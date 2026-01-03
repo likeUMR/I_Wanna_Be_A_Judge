@@ -1,0 +1,134 @@
+.criminal-profile-card {
+  background-color: #fcfaf5;
+  padding: 2.5rem;
+  box-shadow: 5px 5px 20px rgba(0,0,0,0.4);
+  border: 1px solid #d3d3d3;
+  position: relative;
+  font-family: 'SimSun', 'STSong', serif;
+  color: #1a1a1a;
+  min-height: 450px;
+  background-image: 
+    linear-gradient(90deg, rgba(171, 206, 212, 0.2) 79px, rgba(171, 206, 212, 0.2) 81px, transparent 81px),
+    linear-gradient(rgba(0,0,0,0.05) .1em, transparent .1em);
+  background-size: 100% 1.5em;
+  transform: rotate(-1deg);
+  overflow: hidden; /* 确保印章不超出纸张 */
+}
+
+.confidential-stamp {
+  position: absolute;
+  top: 40px;
+  right: 20px;
+  border: 5px double #c0392b;
+  color: #c0392b;
+  padding: 5px 15px;
+  font-weight: 900;
+  transform: rotate(15deg); /* 改回正向倾斜 */
+  opacity: 0.5;
+  font-size: 1.4rem;
+  pointer-events: none;
+  border-radius: 5px;
+  letter-spacing: 2px;
+  z-index: 10; /* 确保印章盖在头像最上面 */
+}
+
+/* 别针效果 */
+.criminal-profile-card::after {
+  content: '📎';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-size: 2.5rem;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+  z-index: 15;
+}
+
+.avatar-placeholder {
+  position: absolute;
+  top: 60px;
+  right: 40px;
+  width: 90px;
+  height: 110px;
+  background: #e0e0e0;
+  border: 1px solid #999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
+  overflow: hidden;
+  transform: rotate(3deg); /* 稍微旋转，像贴上去的照片 */
+  z-index: 5;
+}
+
+.avatar-icon {
+  font-size: 3rem;
+  color: #888;
+}
+
+.avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.5rem;
+  text-align: center;
+  padding: 2px 0;
+}
+
+.profile-title {
+  border-bottom: 2px solid #2c2c2c;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  width: 60%; /* 明确指定宽度，缩短下划线长度 */
+}
+
+.profile-row {
+  margin-bottom: 0.8rem;
+  display: flex;
+}
+
+.label {
+  font-weight: bold;
+  color: #555;
+  width: 80px;
+}
+
+.ml-20 {
+  margin-left: 20px;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.5rem 0;
+  border-left: 4px solid #2c2c2c;
+  padding-left: 10px;
+}
+
+.tags-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: white;
+}
+
+.tag.blue { background-color: #3498db; }
+.tag.red { background-color: #e74c3c; }
+.tag.purple { background-color: #9b59b6; }
+.tag.green { background-color: #2ecc71; }
+
+.record-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #444;
+  background: rgba(0,0,0,0.03);
+  padding: 10px;
+  border-radius: 4px;
+}

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景圆角矩形，确保占满空间并提供对比 -->
+  <rect width="512" height="512" rx="64" fill="#2c1810"/>
+  
+  <!-- 装饰性光晕 -->
+  <circle cx="256" cy="256" r="200" fill="rgba(255, 213, 79, 0.05)"/>
+  
+  <g transform="rotate(-45 256 256)">
+    <!-- 法槌手柄 - 贯穿对角线 -->
+    <rect x="-40" y="236" width="460" height="40" rx="20" fill="#8d6e63"/>
+    
+    <!-- 法槌头部 - 更加厚重 -->
+    <rect x="300" y="136" width="140" height="240" rx="30" fill="#5d4037"/>
+    
+    <!-- 头部金色装饰环 - 增加细节 -->
+    <rect x="300" y="176" width="140" height="20" fill="#ffd54f"/>
+    <rect x="300" y="316" width="140" height="20" fill="#ffd54f"/>
+    
+    <!-- 槌头侧面阴影 -->
+    <path d="M440 166 L440 346 C440 362 426 376 410 376 L400 376 L400 136 L410 136 C426 136 440 150 440 166 Z" fill="rgba(0,0,0,0.2)"/>
+  </g>
+  
+  <!-- 底部装饰天平 - 极简白 -->
+  <path d="M216 420 L296 420 M256 420 L256 460 M196 460 L316 460" stroke="#ffd54f" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+</svg>

@@ -1,0 +1,70 @@
+.evidence-dossier {
+  background-color: #fff;
+  padding: 2.5rem;
+  border: 1px solid #ccc;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background-image: radial-gradient(#eee 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 增加胶带效果 */
+.evidence-dossier::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 30px;
+  background: rgba(255, 255, 200, 0.5);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.dossier-title {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px double #ccc;
+  padding-bottom: 0.5rem;
+}
+
+.scroll-area {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding-right: 10px;
+  padding-bottom: 4rem; /* 增加底部间距，确保因子不被切断 */
+}
+
+.dossier-section {
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.8rem;
+}
+
+.content-box {
+  padding: 1rem;
+  background-color: #fcfcfc;
+  border-left: 3px solid #bdc3c7;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.facts-box {
+  border-left-color: #3498db;
+}
+
+.evidence-box {
+  border-left-color: #2ecc71;
+  font-family: 'STSong', 'SimSun', serif;
+}

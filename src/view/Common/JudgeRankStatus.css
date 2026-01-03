@@ -1,0 +1,84 @@
+.judge-rank-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 25px;
+  border-radius: 4px;
+  border: 1px solid rgba(224, 192, 151, 0.2);
+  border-left: 5px solid #ffb300;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.rank-badge {
+  display: flex;
+  align-items: center;
+}
+
+.badge-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-name {
+  font-family: 'Georgia', serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffb300;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  letter-spacing: 1px;
+}
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.total-val {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: bold;
+}
+
+.score-pop {
+  font-size: 0.85rem;
+  font-weight: bold;
+  animation: pop-up 1s ease-out forwards;
+}
+
+.score-pop.plus { color: #4caf50; }
+.score-pop.minus { color: #f44336; }
+
+@keyframes pop-up {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-10px); opacity: 0; }
+}
+
+.rank-progress-container {
+  width: 200px;
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffb300, #ff8f00);
+  transition: width 0.5s ease-out;
+  box-shadow: 0 0 5px rgba(255, 179, 0, 0.5);
+}
+
+.next-rank-hint {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+  font-family: 'SimSun', serif;
+}
