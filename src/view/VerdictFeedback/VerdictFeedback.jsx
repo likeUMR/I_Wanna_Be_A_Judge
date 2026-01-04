@@ -5,6 +5,12 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
   const { breakdown, totalScore } = scoring;
   const currentRankName = rankInfo?.current?.name || '见习法官';
   
+  const getScoreClass = (score, max) => {
+    if (score === max) return 'score-high';
+    if (score >= max / 2) return 'score-medium';
+    return 'score-low';
+  };
+
   return (
     <div className="verdict-feedback">
       <div className="feedback-header">
@@ -19,6 +25,9 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
 
       <div className="comparison-grid">
         <div className="comp-item">
+          <div className={`block-score ${getScoreClass(breakdown.charge.score, 50)}`}>
+            {breakdown.charge.score}/50
+          </div>
           <h4>罪名判定</h4>
           <div className="comp-row">
             <div className="comp-col">
@@ -35,6 +44,9 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
         </div>
 
         <div className="comp-item">
+          <div className={`block-score ${getScoreClass(breakdown.penalty.score, 40)}`}>
+            {breakdown.penalty.score}/40
+          </div>
           <h4>刑期判定</h4>
           <div className="comp-row">
             <div className="comp-col">
@@ -56,6 +68,9 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
         </div>
 
         <div className="comp-item">
+          <div className={`block-score ${getScoreClass(breakdown.fine.score, 10)}`}>
+            {breakdown.fine.score}/10
+          </div>
           <h4>罚金判定</h4>
           <div className="comp-row">
             <div className="comp-col">

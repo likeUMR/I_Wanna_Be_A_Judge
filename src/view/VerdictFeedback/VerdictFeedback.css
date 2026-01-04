@@ -7,21 +7,18 @@
   margin: 0 auto;
   position: relative;
   border: 1px solid #ddd;
-  background-image: linear-gradient(#eee .1em, transparent .1em);
+  /* 优化背景线条渲染性能 */
+  background-image: linear-gradient(to bottom, #eee 1px, transparent 1px);
   background-size: 100% 2.5em;
   font-family: 'SimSun', 'STSong', serif;
-  /* 增加滚动支持 */
-  max-height: 850px;
-  overflow-y: auto;
+  /* 移除内部滚动，改用全局滚动 */
+  transform: translateZ(0); /* 开启硬件加速 */
+  backface-visibility: hidden;
 }
 
+/* 移除内部滚动条样式 */
 .verdict-feedback::-webkit-scrollbar {
-  width: 8px;
-}
-
-.verdict-feedback::-webkit-scrollbar-thumb {
-  background: rgba(192, 57, 43, 0.3);
-  border-radius: 4px;
+  display: none;
 }
 
 .verdict-feedback::before {
@@ -94,6 +91,37 @@
   background: #f8f9fa;
   padding: 1rem;
   border-radius: 8px;
+  position: relative; /* 为分数定位 */
+}
+
+.block-score {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace; /* 数字使用等宽字体更整齐 */
+  transition: all 0.3s ease;
+}
+
+.score-low {
+  color: #c0392b; /* 深红 */
+  background: rgba(192, 57, 43, 0.1);
+  border: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+.score-medium {
+  color: #d68910; /* 深黄/琥珀色，确保在白底上清晰 */
+  background: rgba(214, 137, 16, 0.1);
+  border: 1px solid rgba(214, 137, 16, 0.2);
+}
+
+.score-high {
+  color: #1e8449; /* 深绿 */
+  background: rgba(30, 132, 73, 0.1);
+  border: 1px solid rgba(30, 132, 73, 0.2);
 }
 
 .comp-row {

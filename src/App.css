@@ -45,16 +45,17 @@ body {
   flex-shrink: 0;
   position: relative;
   /* 移除内阴影，由 viewport 处理 */
+  will-change: transform; /* 优化缩放性能 */
 }
 
 .game-header {
-  background: rgba(44, 24, 16, 0.95);
+  background: rgba(44, 24, 16, 0.98); /* 稍微增加不透明度以减少对 blur 的依赖 */
   color: #e0c097; 
   padding: 0 3rem; 
   display: grid; /* 从 flex 改为 grid 以支持完美居中 */
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px); 移除可能导致滚动性能问题的滤镜 */
   border-bottom: 2px solid #5d4037;
   box-shadow: 0 5px 15px rgba(0,0,0,0.5);
   z-index: 100;
@@ -130,6 +131,8 @@ body {
   overflow-y: auto; /* 允许纵向滚动 */
   position: relative;
   perspective: 1000px;
+  scroll-behavior: auto; /* 确保滚动即时响应 */
+  -webkit-overflow-scrolling: touch;
 }
 
 .workspace {

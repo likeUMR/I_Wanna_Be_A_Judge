@@ -11,6 +11,7 @@ import VerdictFeedback from './view/VerdictFeedback/VerdictFeedback'
 import JudgeRankStatus from './view/Common/JudgeRankStatus'
 import LocationSelector from './view/Common/LocationSelector'
 import StartScreen from './view/StartScreen/StartScreen'
+import LegalManual from './view/Common/LegalManual'
 
 import './App.css'
 
@@ -255,6 +256,9 @@ function App() {
           </div>
         )}
       </main>
+      
+      {/* 法律手册入口 */}
+      <LegalManual />
       </div>
     </div>
   )
