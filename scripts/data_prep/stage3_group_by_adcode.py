@@ -10,16 +10,26 @@ import argparse
 
 # Configuration
 def find_dir(name):
+    # 获取项目根目录下的 data 目录
+    script_dir = Path(__file__).parent
+    project_data_dir = script_dir.parent.parent / "data" / name
+    
     paths = [
-        fr"F:\素材\游戏制作\裁判文书\裁判文书全量数据\{name}",
-        fr"d:\PROJECT\VSCode\AI+Game\I_Wanna_Be_A_Judge\data\{name}"
+        Path(fr"F:\素材\游戏制作\裁判文书\裁判文书全量数据\{name}"),
+        project_data_dir
     ]
     for p in paths:
-        if os.path.exists(p): return Path(p)
+        if p.exists(): return p
+    
+    # 如果都不存在，尝试在 F 盘搜索
     import glob
-    matches = glob.glob(f'F:/**/*{name}*', recursive=True)
-    if matches: return Path(matches[0])
-    return Path(paths[0])
+    try:
+        matches = glob.glob(f'F:/**/*{name}*', recursive=True)
+        if matches: return Path(matches[0])
+    except Exception:
+        pass
+        
+    return paths[0]
 
 SOURCE_DIR = find_dir("structured_results")
 OUTPUT_DIR = find_dir("cases_by_adcode")
@@ -67,11 +77,21 @@ def process_file_worker(filename):
             if valid_rows.empty: continue
 
             for adcode, group_df in valid_rows.groupby('AdCode'):
+                if not adcode or str(adcode).lower() == 'nan':
+                    continue
+                    
                 out_part = year_temp_dir / f"{adcode}.csv"
                 write_header = not out_part.exists()
                 group_df.to_csv(out_part, mode='a', index=False, header=write_header, encoding='utf-8-sig')
                 adcode_counts[adcode] = adcode_counts.get(adcode, 0) + len(group_df)
-                
+        
+        if adcode_counts:
+            # 记录第一个被发现的 adcode 示例
+            sample_code = list(adcode_counts.keys())[0]
+            print(f"DEBUG: {filename} processed. Found {len(adcode_counts)} unique AdCodes. Sample: {sample_code}")
+        else:
+            print(f"DEBUG: {filename} processed. NO valid AdCodes found.")
+            
         return True, filename, adcode_counts
     except Exception as e:
         return False, filename, str(e)
@@ -125,12 +145,21 @@ def process_all_files(test_mode=False):
     TEMP_DIR.mkdir(parents=True, exist_ok=True)
     
     files = [f for f in os.listdir(SOURCE_DIR) if f.endswith('.csv') and 'structured_' in f]
-    files.sort(key=get_year_from_filename, reverse=True)
-    files_to_process = [f for f in files if get_year_from_filename(f) <= 2018]
+    # 按文件名排序，确保测试模式下处理的是确定的文件（通常是按年份顺序）
+    files.sort()
     
+    files_to_process = files
+    
+    if not files_to_process:
+        print(f"\n[致命错误] 输入目录 '{SOURCE_DIR}' 为空。没有结构化数据可供分流。")
+        import sys
+        sys.exit(1)
+
     if test_mode:
         files_to_process = files_to_process[:2]
-        print(f"TEST MODE: {len(files_to_process)} files.")
+        print(f"TEST MODE: Processing {len(files_to_process)} files: {files_to_process}")
+    else:
+        print(f"Found {len(files_to_process)} files to process.")
 
     print(f"Step 1: Parallel Splitting {len(files_to_process)} source files...")
     
@@ -166,8 +195,11 @@ def process_all_files(test_mode=False):
         
         # Pass top-level function and picklable arguments
         futures = [executor.submit(merge_batch_worker, b, adcode_to_parts) for b in batches]
-        for _ in tqdm(as_completed(futures), total=len(futures), desc="Merging"):
-            pass
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Merging"):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error merging batch: {e}")
 
     # Clean up temp files
     shutil.rmtree(TEMP_DIR)

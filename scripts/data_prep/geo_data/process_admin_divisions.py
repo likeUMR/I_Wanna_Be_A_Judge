@@ -111,7 +111,7 @@ if __name__ == "__main__":
     # 当前脚本在 scripts/data_prep/geo_data/，向上退三级到根目录
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     CONFIG_PATH = os.path.join(BASE_DIR, 'src', 'config.js')
-    OUTPUT_PATH = os.path.join(BASE_DIR, 'data', 'processed_admin_divisions.csv')
+    OUTPUT_PATH = os.path.join(BASE_DIR, 'public', 'processed_admin_divisions.csv')
     
     api_key = get_amap_key(CONFIG_PATH)
     if not api_key:

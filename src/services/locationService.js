@@ -7,7 +7,7 @@ import config from '../config';
  */
 export const fetchAdminDivisions = async () => {
   try {
-    const response = await axios.get('/data/processed_admin_divisions.csv', { responseType: 'text' });
+    const response = await axios.get('/processed_admin_divisions.csv', { responseType: 'text' });
     let csvData = response.data;
     if (csvData.startsWith('\ufeff')) {
       csvData = csvData.slice(1);

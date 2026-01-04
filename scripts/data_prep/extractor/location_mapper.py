@@ -7,86 +7,102 @@ from functools import lru_cache
 class LocationMapper:
     def __init__(self, csv_path: str):
         self.districts = []
-        self.name_map = {} # 建立名称到行政区划对象的快速索引
+        self.name_to_districts = {} 
         if not os.path.exists(csv_path):
+            print(f"错误: 找不到行政区划文件 {csv_path}")
             return
         try:
-            # name, adcode, p1, p2
-            # 强制指定 adcode 为字符串，防止出现 .0
-            df = pd.read_csv(csv_path, header=None, names=['name', 'adcode', 'p1', 'p2'], dtype={'adcode': str})
-            # 只保留区县级 (adcode 最后两位非00，且不为空)
-            df_districts = df[df['adcode'].str.strip().str.endswith('00') == False]
-            self.districts = df_districts.to_dict('records')
+            # 必须使用 utf-8-sig 处理 Windows 下的 BOM
+            df = pd.read_csv(csv_path, header=None, names=['name', 'adcode', 'p1', 'p2'], dtype={'adcode': str}, encoding='utf-8-sig')
             
-            # 建立索引：支持全名匹配
+            # 预处理：只保留区县级单位 (adcode 末两位通常非 00)
+            # 或者像东莞(441900)、中山(442000)这种特殊的不设区地级市
+            self.districts = []
+            for d in df.to_dict('records'):
+                code = str(d['adcode'])
+                # 排除省级 (xx0000) 和 大部分地级市 (xxxx00)
+                if not code.endswith('00') or code in ['441900', '442000']:
+                    self.districts.append(d)
+            
+            # 建立索引：支持全名、简称、以及带父级的组合名
             for d in self.districts:
-                name = str(d['name'])
-                if name not in self.name_map:
-                    self.name_map[name] = []
-                self.name_map[name].append(d)
+                name = str(d['name']).strip()
+                if not name: continue
                 
+                # 1. 全名索引 (如 "永昌县")
+                self._add_to_index(name, d)
+                
+                # 2. 简称索引 (如 "永昌")
+                short_name = re.sub(r'(省|市|自治区|特别行政区|区|县|盟|旗)$', '', name)
+                if len(short_name) >= 2:
+                    self._add_to_index(short_name, d)
+                
+                # 3. 组合索引 (如 "金昌市永昌县")
+                p1 = str(d['p1']) if pd.notna(d['p1']) else ""
+                if p1:
+                    self._add_to_index(p1 + name, d)
+                    short_p1 = re.sub(r'(省|市|区|县)$', '', p1)
+                    if len(short_p1) >= 2:
+                        self._add_to_index(short_p1 + name, d)
+
         except Exception as e:
             print(f"加载行政区划失败: {e}")
 
-    @lru_cache(maxsize=4096)
+    def _add_to_index(self, key, dist_obj):
+        if key not in self.name_to_districts:
+            self.name_to_districts[key] = []
+        if dist_obj not in self.name_to_districts[key]:
+            self.name_to_districts[key].append(dist_obj)
+
+    @lru_cache(maxsize=8192)
     def map(self, region: str, court: str) -> str:
-        region = str(region) if pd.notna(region) and region != 'nan' else ""
-        court = str(court) if pd.notna(court) and court != 'nan' else ""
+        region = str(region).strip() if pd.notna(region) and region != 'nan' else ""
+        court = str(court).strip() if pd.notna(court) and court != 'nan' else ""
         
-        # 1. 提取法院所在区域名 (例如: "山东省昌邑市人民法院" -> "昌邑市")
-        court_area = ""
-        m = re.search(r'([\u4e00-\u9fa5]+?)(?:法院|人民法院)', court)
-        if m:
-            court_area = m.group(1)
+        # 提取法院名中的所有中文字符串作为地名候选
+        court_clean = re.sub(r'(人民法院|法院|法庭|派出法庭)$', '', court)
+        
+        # 尝试匹配策略：从长到短
+        # 1. 直接匹配清理后的法院名前缀
+        for i in range(len(court_clean), 1, -1):
+            candidate_key = court_clean[:i]
+            if candidate_key in self.name_to_districts:
+                res = self._pick_best(self.name_to_districts[candidate_key], region, court)
+                if res: return res
 
-        # 2. 确定候选范围：不再遍历全量 self.districts
-        candidates = []
+        # 2. 如果没匹配到，尝试在 court_clean 中寻找已知的区县名
+        best_match = None
+        max_len = 0
+        for name_key in self.name_to_districts:
+            if name_key in court_clean and len(name_key) > max_len:
+                res = self._pick_best(self.name_to_districts[name_key], region, court)
+                if res:
+                    best_match = res
+                    max_len = len(name_key)
         
-        # 策略：如果 region 或 court_area 命中索引，直接使用候选者
-        # 注意：原代码逻辑是 (name == court_area or court_area.endswith(name)) or (name == region or region.endswith(name))
-        # 为了保持一致，我们需要处理后缀匹配
-        
-        # 先尝试精准匹配和后缀匹配
-        search_terms = []
-        if court_area: search_terms.append(court_area)
-        if region: search_terms.append(region)
-        
-        # 为了性能，我们仍然需要一个列表来处理后缀匹配，但只在必要时遍历
-        # 实际上，绝大多数情况下是名称相等。如果一定要保持 endswith 逻辑：
-        for d in self.districts:
-            name = str(d['name'])
-            if len(name) < 2: continue
-            
-            is_court_match = court_area and (name == court_area or court_area.endswith(name))
-            is_region_match = region and (name == region or region.endswith(name))
-            
-            if is_court_match or is_region_match:
-                p1 = str(d['p1']) if pd.notna(d['p1']) else ""
-                p2 = str(d['p2']) if pd.notna(d['p2']) else ""
-                
-                parent_consistent = True
-                if region:
-                    has_parent_info = False
-                    for p in [p1, p2]:
-                        if p and p in region:
-                            has_parent_info = True
-                            break
-                    
-                    if not has_parent_info and len(region) > len(name):
-                        parent_consistent = False
-                
-                if parent_consistent:
-                    candidates.append(d)
+        if best_match: return best_match
 
-        if not candidates: return ""
-        
-        unique_codes = list(set([str(m['adcode']) for m in candidates if m['adcode']]))
-        if len(unique_codes) == 1:
-            return unique_codes[0]
-            
-        if court_area:
-            exact = [str(m['adcode']) for m in candidates if str(m['name']) == court_area]
-            if len(exact) == 1:
-                return exact[0]
+        # 3. 最后尝试 region
+        if region and region in self.name_to_districts:
+            return self._pick_best(self.name_to_districts[region], region, court)
 
         return ""
+
+    def _pick_best(self, candidates, region, court):
+        # 严格过滤：必须是区县级代码
+        valid = [d for d in candidates if not str(d['adcode']).endswith('00') or str(d['adcode']) in ['441900', '442000']]
+        if not valid: return ""
+        
+        # 如果有多个，根据 region 校验
+        if len(valid) > 1 and region:
+            consistent = []
+            for d in valid:
+                p1 = str(d['p1']) if pd.notna(d['p1']) else ""
+                p2 = str(d['p2']) if pd.notna(d['p2']) else ""
+                if (p1 and p1 in region) or (p2 and p2 in region) or (region in p1) or (region in p2):
+                    consistent.append(d)
+            if consistent: valid = consistent
+
+        # 按名称长度排序，越长越精确
+        valid.sort(key=lambda x: len(str(x['name'])), reverse=True)
+        return str(valid[0]['adcode'])

@@ -22,9 +22,9 @@ class OSMCourtFetcher:
         "https://overpass.kumi.systems/api/interpreter"
     ]
     
-    # 使用相对路径，指向项目根目录下的 data 文件夹
-    # 当前脚本在 scripts/data_prep/geo_data/，所以需要向上退三级
-    ADMIN_DIV_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 'data', 'processed_admin_divisions.csv')
+    # 使用相对路径，指向项目根目录下的 public 文件夹
+    # 当前脚本在 scripts/data_prep/geo_data/，所以需要向上退四级
+    ADMIN_DIV_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 'public', 'processed_admin_divisions.csv')
     
     def __init__(self, timeout=300):
         self.timeout = timeout

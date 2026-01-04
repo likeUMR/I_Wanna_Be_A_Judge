@@ -87,14 +87,32 @@ def safe_to_csv(df, path):
     print(f"错误: 无法写入文件 {path}，请手动关闭后重新运行。")
     return False
 
-def process_directory(input_dir: str, output_dir: str, start_year: int = None, end_year: int = None):
+def process_directory(input_dir: str, output_dir: str, start_year: int = None, end_year: int = None, test_mode: bool = False):
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     
     # 初始化位置映射器路径
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    admin_csv = os.path.join(project_root, "data", "processed_admin_divisions.csv")
-    if not os.path.exists(admin_csv):
-        admin_csv = os.path.join(os.getcwd(), "data", "processed_admin_divisions.csv")
+    # 尝试多种方式定位 public 目录
+    possible_admin_paths = [
+        # 1. 项目根目录 (从 scripts/data_prep/ 向上三级)
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "public", "processed_admin_divisions.csv"),
+        # 2. 从当前工作目录找
+        os.path.join(os.getcwd(), "public", "processed_admin_divisions.csv"),
+        # 3. 如果在 scripts/data_prep 运行
+        os.path.join(os.getcwd(), "..", "..", "public", "processed_admin_divisions.csv"),
+    ]
+    
+    admin_csv = None
+    for p in possible_admin_paths:
+        if os.path.exists(p):
+            admin_csv = p
+            break
+            
+    if not admin_csv:
+        print(f"[致命错误] 无法定位行政区划文件 processed_admin_divisions.csv")
+        print(f"已尝试路径: {possible_admin_paths}")
+        sys.exit(1)
+        
+    print(f"使用行政区划文件: {admin_csv}")
     
     # 定义字段
     main_fields = [
@@ -113,24 +131,40 @@ def process_directory(input_dir: str, output_dir: str, start_year: int = None, e
         '涉案金额', '罚金', '罪名', '主刑', '出生日期', 'AdCode'
     ]
 
-    for filename in os.listdir(input_dir):
+    files_to_process = [f for f in os.listdir(input_dir) if f.endswith('.csv')]
+    if not files_to_process:
+        print(f"[致命错误] 输入目录 {input_dir} 中没有找到 CSV 文件！")
+        sys.exit(1)
+    if test_mode:
+        # 测试模式：专门挑选 2013 年的数据
+        files_to_process = [f for f in files_to_process if "2013" in f][:1]
+        if not files_to_process:
+            files_to_process = [f for f in os.listdir(input_dir) if f.endswith('.csv')][:1]
+        print(f"测试模式: 仅处理 {len(files_to_process)} 个文件 (优先匹配 2013 年)")
+
+    for filename in files_to_process:
         t_start = time.time()
-        if not filename.endswith('.csv'): continue
         year_m = re.search(r'(\d{4})', filename)
         if year_m:
             year = int(year_m.group(1))
-            if start_year and end_year and not (start_year <= year <= end_year): continue
+            if not test_mode and start_year and end_year and not (start_year <= year <= end_year): continue
             
         input_path = os.path.join(input_dir, filename)
         try:
             # 尝试不同编码读取
             try:
-                df = pd.read_csv(input_path, encoding='utf-8-sig')
+                if test_mode:
+                    df = pd.read_csv(input_path, encoding='utf-8-sig', nrows=100)
+                else:
+                    df = pd.read_csv(input_path, encoding='utf-8-sig')
                 # 检查是否成功读取到中文列名，如果全是乱码则尝试 gbk
                 if not any('案' in str(c) or '法' in str(c) for c in df.columns):
                     raise ValueError("Encoding check failed")
             except Exception:
-                df = pd.read_csv(input_path, encoding='gbk')
+                if test_mode:
+                    df = pd.read_csv(input_path, encoding='gbk', nrows=100)
+                else:
+                    df = pd.read_csv(input_path, encoding='gbk')
             
             # 统一列名映射
             col_map = {c: c for c in df.columns}
@@ -242,6 +276,7 @@ if __name__ == "__main__":
     parser.add_argument("--end_year", type=int)
     parser.add_argument("--input", type=str)
     parser.add_argument("--output", type=str)
+    parser.add_argument("--test", action="store_true", help="测试模式：处理少量数据")
     args = parser.parse_args()
 
     INPUT = args.input if args.input else r'F:\素材\游戏制作\裁判文书\裁判文书全量数据\processed_results'
@@ -252,40 +287,48 @@ if __name__ == "__main__":
         OUTPUT = os.path.join(os.getcwd(), 'data', 'structured_results')
 
     if os.path.exists(INPUT):
-        process_directory(INPUT, OUTPUT, args.start_year, args.end_year)
+        process_directory(INPUT, OUTPUT, args.start_year, args.end_year, test_mode=args.test)
         
-        # 抽样检查逻辑 (默认为2013年)
-        check_year = 2013
-        output_file = os.path.join(OUTPUT, f"structured_filtered_{check_year}.csv")
-        if not os.path.exists(output_file):
-            output_file = os.path.join(OUTPUT, f"structured_{check_year}.csv")
+        # 抽样检查逻辑：检查刚刚生成的文件
+        print(f"\n{'='*50}\n【数据随机抽检】")
+        
+        # 查找刚刚生成的文件
+        output_files = [f for f in os.listdir(OUTPUT) if f.startswith("structured_") and f.endswith(".csv")]
+        if not output_files:
+            print("没有找到生成的结果文件，无法抽检。")
+        else:
+            # 优先检查最新的文件
+            output_files.sort(key=lambda x: os.path.getmtime(os.path.join(OUTPUT, x)), reverse=True)
+            output_file = os.path.join(OUTPUT, output_files[0])
             
-        if os.path.exists(output_file):
-            print(f"\n{'='*50}\n【{check_year}年数据随机抽检】")
+            print(f"正在抽检文件: {output_file}")
             try:
-                df_sample = pd.read_csv(output_file, dtype={'AdCode': str})
+                # 显式指定 AdCode 为字符串
+                df_sample = pd.read_csv(output_file, dtype={'AdCode': str}, encoding='utf-8-sig', nrows=1000)
                 if not df_sample.empty:
-                    samples = df_sample.sample(min(2, len(df_sample)))
-                    for i, (idx, row) in enumerate(samples.iterrows()):
-                        try:
-                            print(f"\n--- 样例 {i+1} ---")
-                            print(f"姓名: {row.get('姓名')} | 性别: {row.get('性别')} | 年龄: {row.get('年龄')} | 未成年: {row.get('是否未成年')}")
-                            print(f"特殊状况: {row.get('特殊身体状况')} | AdCode: {row.get('AdCode')}")
-                            print(f"案由: {row.get('案由')} | 涉案金额: {row.get('涉案金额')} | 罚金: {row.get('罚金')}")
-                            print(f"累犯: {row.get('是否累犯')} | 初犯: {row.get('是否初犯')} | 未遂: {row.get('是否未遂')}")
-                            print(f"自首: {row.get('是否自首')} | 立功: {row.get('是否立功')} | 谅解: {row.get('是否取得谅解')} | 退赃: {row.get('是否退赃')}")
-                            print(f"surrender_type: {row.get('surrender_type')} (0:无, 1:自首, 2:立功)")
-                            print(f"主刑: {row.get('主刑')} ({row.get('刑期_年', 0)}年{row.get('刑期_月', 0)}月)")
-                            content = str(row.get('全文', ''))[:300].replace('\n', ' ')
-                            print(f"原文片段: {content}...")
-                            print("-" * 30)
-                        except Exception as e_sample:
-                            print(f"样例显示出错: {e_sample}")
+                    # 检查 AdCode 填充情况
+                    valid_adcodes = df_sample[df_sample['AdCode'].notna() & (df_sample['AdCode'] != '')]
+                    print(f"抽检样本数: {len(df_sample)}, 有效 AdCode 数量: {len(valid_adcodes)}")
+                    
+                    if len(valid_adcodes) > 0:
+                        samples = valid_adcodes.sample(min(2, len(valid_adcodes)))
+                        for i, (idx, row) in enumerate(samples.iterrows()):
+                            try:
+                                print(f"\n--- 样例 {i+1} ---")
+                                print(f"姓名: {row.get('姓名')} | 法院: {row.get('法院')} | AdCode: {row.get('AdCode')}")
+                                print(f"案由: {row.get('案由')} | 刑期: {row.get('主刑')}")
+                                print("-" * 30)
+                            except Exception: pass
+                    else:
+                        print("警告: 抽检样本中没有任何有效的 AdCode！")
+                        # 打印前几行看看 AdCode 列到底是什么
+                        print("前 5 行 AdCode 列内容:")
+                        print(df_sample['AdCode'].head().tolist())
                 else:
                     print("结果文件为空，无法抽检。")
             except Exception as e:
                 print(f"抽检过程出错: {e}")
-            print(f"{'='*50}\n")
+        print(f"{'='*50}\n")
     else:
         print(f"路径不存在: {INPUT}")
 
