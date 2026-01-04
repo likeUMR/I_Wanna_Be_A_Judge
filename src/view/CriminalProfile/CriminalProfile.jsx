@@ -50,7 +50,9 @@ const CriminalProfile = ({ defendant, court }) => {
 
         <div className="history-section">
           <h3 className="section-subtitle">历史战绩</h3>
-          <p className="record-text">{defendant.criminalRecord}</p>
+          <p className="record-text">
+            {(!defendant.criminalRecord || defendant.criminalRecord === '无') ? '初犯' : defendant.criminalRecord}
+          </p>
         </div>
       </div>
     </div>

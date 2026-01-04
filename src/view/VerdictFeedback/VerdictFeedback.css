@@ -28,16 +28,28 @@
   display: none;
 }
 
-.verdict-paper::before {
-  content: '中华人民共和国法院';
-  display: block;
+.verdict-header {
   text-align: center;
-  font-size: 2rem;
-  color: #c0392b;
-  font-weight: bold;
-  margin-bottom: 2rem;
+  margin-bottom: 2.3rem;
   border-bottom: 2px solid #c0392b;
   padding-bottom: 1rem;
+}
+
+.verdict-title {
+  font-size: 2.4rem;
+  color: #c0392b;
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: 0.5rem;
+  font-family: 'SimHei', sans-serif;
+}
+
+.verdict-case-id {
+  font-size: 1.1rem;
+  color: #444;
+  margin-top: 0.8rem;
+  font-family: 'SimSun', 'STSong', serif;
+  font-weight: bold;
 }
 
 .feedback-header {

@@ -14,6 +14,11 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
   return (
     <div className={`verdict-feedback-container ${isSealed ? 'sealed' : ''}`}>
       <div className="verdict-paper">
+        <div className="verdict-header">
+          <h1 className="verdict-title">中华人民共和国法院</h1>
+          <div className="verdict-case-id">{caseObj.id}</div>
+        </div>
+
         {/* 结案印章 - 圆形且更大，盖在文书右上角 */}
         {isSealed && (
           <div className="verdict-seal">
