@@ -122,7 +122,7 @@ const LocationSelector = ({ onLocationChange }) => {
         <label className="switch-label">
           <input type="checkbox" checked={isManual} onChange={toggleManual} />
           <span className="slider"></span>
-          <span className="text">{isManual ? '调试：手动选址' : '自动定位中'}</span>
+          <span className="text">{isManual ? '手动定位' : '自动定位'}</span>
         </label>
       </div>
 

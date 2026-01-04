@@ -19,7 +19,7 @@ body {
   justify-content: center;
   align-items: flex-start; /* 贴顶显示 */
   background: #2c1810; 
-  background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+  background-image: url('/assets/textures/wood-pattern.png');
   background-size: 400px 400px;
   overflow: hidden;
   position: relative;
@@ -272,7 +272,7 @@ body {
   box-shadow: 0 2px 0 #3e2723, 0 5px 10px rgba(0,0,0,0.5);
 }
 
-.loading-screen, .loading-case {
+.loading-case {
   display: flex;
   flex-direction: column;
   align-items: center;

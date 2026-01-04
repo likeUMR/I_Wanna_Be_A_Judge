@@ -41,7 +41,8 @@
   height: 12px;
   width: 12px;
   left: 2px;
-  bottom: 2px;
+  top: 50%;
+  transform: translateY(-50%);
   background-color: #e0c097;
   transition: .4s;
   border-radius: 50%;
@@ -52,7 +53,7 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(16px);
+  transform: translateY(-50%) translateX(16px);
 }
 
 .selectors {

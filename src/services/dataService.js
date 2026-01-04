@@ -8,7 +8,7 @@ let blocksManifest = null;
 /**
  * 加载分片清单
  */
-const loadManifest = async () => {
+export const loadManifest = async () => {
   if (blocksManifest) return blocksManifest;
   try {
     const res = await axios.get('/data/blocks_manifest.json');

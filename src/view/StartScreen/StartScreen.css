@@ -1,0 +1,172 @@
+.start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: transparent; /* 改为透明，允许看到底层 */
+  pointer-events: auto;
+}
+
+/* 帷幕开启后的背景渐变遮罩 */
+.start-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  pointer-events: none;
+  z-index: 5; /* 在内容之上，但在帷幕和按钮之下 */
+}
+
+.start-screen.started::before {
+  opacity: 0; /* 最终全透明 */
+}
+
+/* 未开始时，背景是全黑的（或者你可以让它半透，但我建议初始全黑） */
+.start-screen:not(.started) {
+  background-color: rgba(0, 0, 0, 0.5); /* 降低初始遮罩，让玩家能隐约看到后面的法庭 */
+}
+
+.start-screen.started {
+  pointer-events: none; /* 允许点击底层内容 */
+  background-color: transparent;
+  transition: background-color 1.5s ease;
+}
+
+/* 帷幕容器 */
+.curtain-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+/* 左右两片帷幕 */
+.curtain-left, .curtain-right {
+  flex: 1;
+  height: 100%;
+  background: linear-gradient(to right, 
+    #8b0000 0%, 
+    #a52a2a 10%, 
+    #8b0000 20%, 
+    #a52a2a 30%, 
+    #8b0000 40%, 
+    #a52a2a 50%, 
+    #8b0000 60%, 
+    #a52a2a 70%, 
+    #8b0000 80%, 
+    #a52a2a 90%, 
+    #8b0000 100%
+  );
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+  transition: transform 1.5s cubic-bezier(0.7, 0, 0.3, 1);
+  position: relative;
+}
+
+/* 金色流苏效果 */
+.curtain-left::after, .curtain-right::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: repeating-linear-gradient(to right,
+    #ffd700 0px,
+    #ffd700 2px,
+    #b8860b 4px
+  );
+  border-top: 2px solid #b8860b;
+}
+
+/* 帷幕拉开状态 */
+.start-screen.started .curtain-left {
+  transform: translateX(-100%);
+}
+.start-screen.started .curtain-right {
+  transform: translateX(100%);
+}
+
+/* 中心交互区域 */
+.start-content {
+  position: relative;
+  z-index: 2100;
+  text-align: center;
+  color: #fff;
+  transition: opacity 0.5s ease;
+}
+
+.start-screen.started .start-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gavel-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.gavel-icon-btn img {
+  width: 200px;
+  height: 200px;
+  filter: drop-shadow(0 0 15px rgba(255, 179, 0, 0.6));
+}
+
+.gavel-icon-btn:hover:not(:disabled) {
+  transform: scale(1.05) rotate(-5deg);
+}
+
+.gavel-icon-btn:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.gavel-icon-btn:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* 按钮文字 */
+.start-btn-text {
+  display: block;
+  margin-top: 15px;
+  font-size: 1.8rem;
+  font-family: 'SimSun', serif;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #ffb300;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.loading-status {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #e0c097;
+  font-family: 'SimSun', serif;
+  height: 1.2rem;
+}
+
+/* 法槌旋转动画 (加载中) */
+.gavel-icon-btn.loading img {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

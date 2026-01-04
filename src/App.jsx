@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { fetchFullLocation } from './services/locationService'
+import { useAssets } from './hooks/useAssets'
 import { useGame } from './hooks/useGame'
 
 // Components
@@ -10,16 +10,20 @@ import PenaltyMeter from './view/PenaltyMeter/PenaltyMeter'
 import VerdictFeedback from './view/VerdictFeedback/VerdictFeedback'
 import JudgeRankStatus from './view/Common/JudgeRankStatus'
 import LocationSelector from './view/Common/LocationSelector'
+import StartScreen from './view/StartScreen/StartScreen'
 
 import './App.css'
 
 function App() {
-  const [location, setLocation] = useState(null)
+  const { isReady, loadingStatus, location: autoLocation, error: assetError } = useAssets()
   const [manualLocation, setManualLocation] = useState(null)
-  const [locLoading, setLocLoading] = useState(true)
-  const [districtStatus, setDistrictStatus] = useState('')
+  const [isOpening, setIsOpening] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
   const [scale, setScale] = useState(1)
   
+  // 当前生效的地理位置信息
+  const currentLocation = manualLocation || autoLocation;
+
   // 处理分辨率适配
   useEffect(() => {
     const handleResize = () => {
@@ -31,10 +35,7 @@ function App() {
       const scaleX = windowWidth / designWidth;
       const scaleY = windowHeight / designHeight;
       
-      // 使用 cover 逻辑：让内容尽可能填满，但不裁剪核心区域
-      // 或者使用 Math.min 确保全部可见，但背景铺满
       const newScale = Math.min(scaleX, scaleY);
-      
       setScale(newScale);
     };
 
@@ -46,7 +47,7 @@ function App() {
   const {
     currentCase,
     loading: caseLoading,
-    error,
+    error: gameError,
     playerJudgment,
     showFeedback,
     scoring,
@@ -59,24 +60,12 @@ function App() {
     toggleFactor
   } = useGame()
 
-  // 统一的定位逻辑
-  const initLocation = useCallback(async () => {
-    setLocLoading(true)
-    try {
-      const loc = await fetchFullLocation(setDistrictStatus)
-      setLocation(loc)
-      setLocLoading(false)
-      if (!manualLocation) {
-        loadCase(loc.adcode || '110101')
-      }
-    } catch (err) {
-      console.error('Location failed:', err)
-      setLocLoading(false)
-      if (!manualLocation) {
-        loadCase('110101')
-      }
+  // 当资产准备就绪且有位置信息时，预加载第一个案例
+  useEffect(() => {
+    if (isReady && autoLocation && !currentCase && !caseLoading) {
+      loadCase(autoLocation.adcode || '110101')
     }
-  }, [loadCase, manualLocation])
+  }, [isReady, autoLocation, loadCase, currentCase, caseLoading])
 
   // 处理位置切换
   const handleManualLocationChange = (newLoc) => {
@@ -84,39 +73,37 @@ function App() {
     if (newLoc) {
       loadCase(newLoc.adcode)
     } else {
-      // 切回自动模式，重新加载当前自动定位的案例
-      if (location) {
-        loadCase(location.adcode || '110101')
-      } else {
-        initLocation()
+      // 切回自动模式
+      if (autoLocation) {
+        loadCase(autoLocation.adcode || '110101')
       }
     }
   }
 
-  // Initial Location
-  useEffect(() => {
-    initLocation()
-  }, []) // 仅在挂载时执行一次自动定位
-
-  if (locLoading) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner"></div>
-        <p>正在定位并准备您的法官办公室...</p>
-        <p className="status">{districtStatus}</p>
-      </div>
-    )
-  }
+  // 错误合并
+  const error = assetError || gameError;
 
   return (
     <div className="app-viewport">
+      {!gameStarted && (
+        <StartScreen 
+          isReady={isReady} 
+          status={loadingStatus} 
+          onOpening={() => setIsOpening(true)}
+          onStart={() => setGameStarted(true)} 
+        />
+      )}
+
       <div 
         className="app-container" 
         style={{ 
           transform: `scale(${scale})`,
           width: '1920px',
           height: '960px',
-          transformOrigin: 'top center'
+          transformOrigin: 'top center',
+          visibility: 'visible', /* 始终可见，由 StartScreen 遮盖 */
+          filter: isOpening ? 'none' : 'brightness(0.5)', /* 未开始时变暗 */
+          transition: 'filter 1.5s ease'
         }}
       >
         <header className="game-header">
@@ -136,14 +123,9 @@ function App() {
           </div>
           <div className="header-right">
             <LocationSelector onLocationChange={handleManualLocationChange} />
-            {!manualLocation && location && (
-              <div className="location">
-                📍 {location.province} · {location.city} · {location.district}
-              </div>
-            )}
-            {manualLocation && (
-              <div className="location manual">
-                📍 {manualLocation.province} · {manualLocation.city} · {manualLocation.district}
+            {currentLocation && (
+              <div className={`location ${manualLocation ? 'manual' : ''}`}>
+                📍 {currentLocation.province} · {currentLocation.city} · {currentLocation.district}
               </div>
             )}
           </div>
@@ -154,8 +136,8 @@ function App() {
             <div className="loading-case">案卷调取中...</div>
           ) : error ? (
             <div className="error-box">
-              <p>案卷加载失败: {error}</p>
-              <button onClick={() => loadCase(manualLocation?.adcode || location?.adcode || '110101')}>重试</button>
+              <p>异常: {error}</p>
+              <button onClick={() => loadCase(currentLocation?.adcode || '110101')}>重试</button>
             </div>
           ) : currentCase && (
             <div className="workspace">
@@ -261,7 +243,7 @@ function App() {
                 scoring={scoring}
                 scoreChange={scoreChange}
                 rankInfo={rankInfo}
-                onNextCase={() => loadCase(manualLocation?.adcode || location?.adcode || '110101')}
+                onNextCase={() => loadCase(currentLocation?.adcode || '110101')}
               />
             )}
           </div>
