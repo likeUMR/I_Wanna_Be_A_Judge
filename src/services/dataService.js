@@ -11,7 +11,7 @@ let blocksManifest = null;
 export const loadManifest = async () => {
   if (blocksManifest) return blocksManifest;
   try {
-    const res = await axios.get('/data/blocks_manifest.json');
+    const res = await axios.get('data/blocks_manifest.json');
     blocksManifest = res.data;
     return blocksManifest;
   } catch (e) {
@@ -63,8 +63,8 @@ const pickNewCase = (cases, playedIds, ignorePlayed = false) => {
 const tryBlockAndPick = async (adcode, type, blockNum, playedIds, ignorePlayed = false) => {
   const blockNumStr = String(blockNum).padStart(2, '0');
   const url = type === 'perfect' 
-    ? `/data/perfect/${adcode}_perfect_${blockNumStr}.csv`
-    : `/data/${adcode}_filtered_${blockNumStr}.csv`;
+    ? `data/perfect/${adcode}_perfect_${blockNumStr}.csv`
+    : `data/${adcode}_filtered_${blockNumStr}.csv`;
 
   try {
     const response = await axios.get(url, { responseType: 'text' });

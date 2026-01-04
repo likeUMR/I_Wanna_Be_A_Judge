@@ -300,7 +300,7 @@
   width: 450px;
   padding: 40px;
   background: #f4e4bc; /* 宣纸色 */
-  background-image: url('/assets/textures/wood-pattern.png'); /* 复用纹理增强质感 */
+  background-image: url('assets/textures/wood-pattern.png'); /* 复用纹理增强质感 */
   border: 12px double #8b4513;
   box-shadow: 0 20px 50px rgba(0,0,0,0.8);
   position: relative;

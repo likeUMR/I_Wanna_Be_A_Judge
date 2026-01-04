@@ -88,7 +88,7 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
           onClick={handleStart}
           disabled={!isReady || showConfirm}
         >
-          <img src="/favicon.svg" alt="法槌图标" />
+          <img src="favicon.svg" alt="法槌图标" />
           <span className="start-btn-text">
             {isReady ? '开启审判' : '正在准备'}
           </span>

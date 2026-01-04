@@ -7,7 +7,7 @@ import config from '../config';
  */
 export const fetchAdminDivisions = async () => {
   try {
-    const response = await axios.get('/processed_admin_divisions.csv', { responseType: 'text' });
+    const response = await axios.get('processed_admin_divisions.csv', { responseType: 'text' });
     let csvData = response.data;
     if (csvData.startsWith('\ufeff')) {
       csvData = csvData.slice(1);
@@ -62,7 +62,7 @@ const getCoordsByIP = async () => {
     console.log('[定位] 当前识别到的公网 IP:', userIP || '自动识别');
 
     const res = await axios.post(
-      '/api-mapchaxun/api/mapApi/getIpMes',
+      'api-mapchaxun/api/mapApi/getIpMes',
       { ip: userIP }, // 显式传递 IP 以防被服务器代理掩盖真实地址
       {
         headers: {

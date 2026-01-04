@@ -26,7 +26,7 @@ export const useAssets = () => {
         // 任务 C: 背景纹理预加载
         new Promise((resolve, reject) => {
           const img = new Image();
-          img.src = '/assets/textures/wood-pattern.png';
+          img.src = 'assets/textures/wood-pattern.png';
           img.onload = resolve;
           img.onerror = reject;
         })
