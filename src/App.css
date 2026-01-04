@@ -19,7 +19,7 @@ body {
   justify-content: center;
   align-items: flex-start; /* 贴顶显示 */
   background: #2c1810; 
-  background-image: url('assets/textures/wood-pattern.png');
+  background-image: var(--bg-texture, none);
   background-size: 400px 400px;
   overflow: hidden;
   position: relative;
