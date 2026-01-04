@@ -40,12 +40,12 @@ export const fetchAdminDivisions = async () => {
  */
 const getPublicIP = async () => {
   try {
-    // 使用国内响应极快的 IP 接口 (4.ipw.cn 专门提供公网 IP 返回，纯文本格式)
-    const res = await axios.get('https://4.ipw.cn', { timeout: 1500 });
+    // 改用同源代理路径，规避直接请求 4.ipw.cn 的 CORS 限制
+    const res = await axios.get('api-ip', { timeout: 1500 });
     return typeof res.data === 'string' ? res.data.trim() : null;
   } catch (e) {
     console.warn('[定位] IP 获取失败或超时，将由接口自动识别:', e.message);
-    return null; // 失败时返回 null，接口会根据请求来源自动识别 IP
+    return null; 
   }
 };
 

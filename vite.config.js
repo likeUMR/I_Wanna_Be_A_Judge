@@ -15,6 +15,11 @@ export default defineConfig({
           'Referer': 'https://www.mapchaxun.cn/Regeo',
           'Origin': 'https://www.mapchaxun.cn'
         }
+      },
+      '/api-ip': {
+        target: 'https://4.ipw.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-ip/, '')
       }
     }
   }

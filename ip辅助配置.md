@@ -1,42 +1,68 @@
-简单直接地回答：不能直接运行，需要额外配置 Nginx。
-目前的方案在开发环境下（npm run dev）运行完美，是因为 Vite 的开发服务器充当了“中间人”来帮你转发请求并伪造 Referer 头。但是当你执行 vite build 之后，所有的代理配置都会失效，因为生成的只是纯静态文件（HTML/JS/CSS）。
-要在生产环境（Nginx）中跑通，你需要在 Nginx 的配置文件中手动添加一段“反向代理”配置，来模拟 Vite 的行为。
-为什么需要配置？
-浏览器出于安全考虑，禁止 JS 代码修改 Referer。你在开发环境能成功，是因为请求路径 /api-mapchaxun 被 Vite 拦截并由 Node.js 后端 发出了请求（后端不受浏览器限制）。
-Nginx 配置方案
-在你的 Nginx 虚拟主机配置（通常是 /etc/nginx/conf.d/default.conf 或类似文件）的 server 块中，添加以下内容：
+# 服务端部署与 Nginx 代理配置文档
 
+本项目在生产环境下需要 Nginx 反向代理来处理跨域请求、Referer 校验以及获取用户真实 IP。
+
+## 1. Nginx 核心配置
+
+在你的 Nginx 虚拟主机配置文件中（通常在 `/etc/nginx/conf.d/` 或 `/etc/nginx/sites-available/` 下），请在对应的 `server` 块中添加以下内容。
+
+> **注意**：下文中的 `/i-wanna-be-a-judge/` 应替换为你实际的部署子目录路径。
+
+```nginx
 server {
-    listen 80;
-    server_name yourdomain.com; # 你的域名
+    listen 443 ssl; # 建议使用 HTTPS
+    server_name gallery.liruochen.cn;
 
-    # 静态资源根目录
-    location / {
-        root /usr/share/nginx/html; # 你部署打包后文件的路径
+    # 1. 静态资源根目录
+    location /i-wanna-be-a-judge/ {
+        alias /var/www/i-wanna-be-a-judge/dist/; # 替换为你的 dist 文件夹实际路径
         index index.html;
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ /i-wanna-be-a-judge/index.html;
     }
 
-    # 【关键】对应代码里的 /api-mapchaxun 代理配置
-    location /api-mapchaxun/ {
-        # 转发到目标接口
+    # 2. 定位接口代理 (解决 Referer 校验与跨域)
+    location /i-wanna-be-a-judge/api-mapchaxun/ {
         proxy_pass https://www.mapchaxun.cn/;
         
-        # 必须伪造请求头，否则对方服务器会拒绝
+        # 必须伪造请求头，否则对方服务器会拒绝请求
         proxy_set_header Referer "https://www.mapchaxun.cn/Regeo";
         proxy_set_header Origin "https://www.mapchaxun.cn";
         proxy_set_header Host "www.mapchaxun.cn";
         
-        # 避免证书校验等可能导致的问题（可选）
         proxy_ssl_server_name on;
-        
-        # 处理跨域（如果 Nginx 和前端域名不一致）
         add_header 'Access-Control-Allow-Origin' '*';
     }
-}
 
-部署时的注意事项：
-路径一致性：代码中使用的请求路径是 /api-mapchaxun/...，所以 Nginx 的 location 必须也是这个名字。
-HTTPS 问题：如果你的服务器是 HTTPS 的，而接口是 HTTP 的，浏览器可能会报 Mixed Content 错误。不过 mapchaxun.cn 支持 HTTPS，所以尽量保持全站 HTTPS。
-高德 API Key：高德的 restapi.amap.com 支持 CORS，通常不需要通过 Nginx 代理，直接在前端调用即可（就像你现在代码里写的那样）。
-总结： 部署后，前端发出的 /api-mapchaxun 请求会被你的 Nginx 拦截，Nginx 会像之前的 Vite 一样，帮你在后台带上 Referer 头去请求目标服务器，然后再把结果吐回给前端。这样就完美解决了生产环境的限制问题。
+    # 3. IP 获取接口代理 (解决 CORS 跨域限制)
+    location /i-wanna-be-a-judge/api-ip {
+        proxy_pass https://4.ipw.cn/;
+        
+        # 强制指定 Host，穿透对方的反向代理校验
+        proxy_set_header Host "4.ipw.cn";
+        
+        proxy_ssl_server_name on;
+    }
+}
+```
+
+## 2. 部署流程 (更新步骤)
+
+每次更新代码后，请按照以下步骤操作：
+
+1. **本地构建**：
+   ```bash
+   npm run build
+   ```
+2. **同步代码**：
+   将本地 `dist/` 目录下的内容通过 Git 或 SCP 同步到服务器的对应目录。
+3. **重载 Nginx** (仅在第一次配置或修改 Nginx 配置后需要)：
+   ```bash
+   sudo nginx -t          # 检查配置文件语法是否正确
+   sudo nginx -s reload   # 平滑重载配置
+   ```
+
+## 3. 原理解析
+
+*   **api-mapchaxun**: 前端代码调用 `api-mapchaxun/...`。Nginx 会在后台将其转发给 `mapchaxun.cn`。由于后端（Nginx）不受浏览器 Referer 修改限制，它可以成功伪造来源完成校验。
+*   **api-ip**: 由于 `4.ipw.cn` 的 CORS 策略非常严格，前端直接调用会报跨域错误。通过 Nginx 代理，前端访问的是同源路径，由 Nginx 在后端代为请求获取 IP。
+*   **子目录部署**: 代码中已通过 `vite.config.js` 的 `base: './'` 实现了相对路径引用，结合 Nginx 的 `alias` 或 `root` 配置，可确保在任何子路径下正常运行。
