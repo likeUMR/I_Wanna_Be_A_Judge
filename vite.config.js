@@ -16,10 +16,10 @@ export default defineConfig({
           'Origin': 'https://www.mapchaxun.cn'
         }
       },
-      '/api-ip': {
+      '/get-my-ip': {
         target: 'https://4.ipw.cn',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-ip/, '')
+        rewrite: (path) => path.replace(/^\/get-my-ip/, '')
       }
     }
   }

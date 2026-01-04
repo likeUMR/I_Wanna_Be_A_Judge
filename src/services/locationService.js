@@ -36,15 +36,16 @@ export const fetchAdminDivisions = async () => {
 };
 
 /**
- * 获取用户公网 IP (优先使用国内极速接口)
+ * 获取用户公网 IP (由我们自己的服务器直接回显，速度最快且最准)
  */
 const getPublicIP = async () => {
   try {
-    // 改用同源代理路径，规避直接请求 4.ipw.cn 的 CORS 限制
-    const res = await axios.get('api-ip', { timeout: 1500 });
+    // 请求同域名下的接口，Nginx 会直接返回用户的真实 IP
+    const res = await axios.get('get-my-ip', { timeout: 1500 });
+    // 预期返回的是纯文本 IP 字符串
     return typeof res.data === 'string' ? res.data.trim() : null;
   } catch (e) {
-    console.warn('[定位] IP 获取失败或超时，将由接口自动识别:', e.message);
+    console.warn('[定位] 自动获取真实 IP 失败，将由定位接口尝试自动识别:', e.message);
     return null; 
   }
 };
