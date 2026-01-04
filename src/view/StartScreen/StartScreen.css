@@ -82,13 +82,35 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20px;
+  height: 25px; /* 稍微加高一点，更有质感 */
+  /* 使用与帷幕同步的重复线性渐变，模拟丝线光泽 */
   background: repeating-linear-gradient(to right,
-    #ffd700 0px,
-    #ffd700 2px,
-    #b8860b 4px
+    #ffd700 0%,
+    #b8860b 5%,
+    #ffd700 10%
   );
+  /* 叠加一个半透明的阴影渐变，使流苏的深浅与帷幕褶皱的光影同步 */
+  background-image: 
+    linear-gradient(to right, 
+      rgba(0,0,0,0.3) 0%, 
+      transparent 10%, 
+      rgba(0,0,0,0.3) 20%, 
+      transparent 30%, 
+      rgba(0,0,0,0.3) 40%, 
+      transparent 50%, 
+      rgba(0,0,0,0.3) 60%, 
+      transparent 70%, 
+      rgba(0,0,0,0.3) 80%, 
+      transparent 90%, 
+      rgba(0,0,0,0.3) 100%
+    ),
+    repeating-linear-gradient(to right,
+      #ffd700 0px,
+      #ffd700 2px,
+      #b8860b 4px
+    );
   border-top: 2px solid #b8860b;
+  box-shadow: 0 -5px 10px rgba(0,0,0,0.3); /* 给流苏顶部加一点点阴影，增加垂坠感 */
 }
 
 /* 帷幕拉开状态 */
@@ -139,6 +161,57 @@
 .gavel-icon-btn:disabled {
   cursor: wait;
   opacity: 0.7;
+}
+
+/* 刺绣容器定位 */
+.embroidery-container {
+  position: absolute;
+  top: 10%; /* 稍微向上挪一点，给大字腾空间 */
+  width: 2000px; /* 容器宽度大幅增加 */
+  height: 400px; /* 高度大幅增加 */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.embroidery-container.left {
+  right: 0;
+}
+
+.embroidery-container.right {
+  left: 0;
+}
+
+/* SVG 样式 */
+.embroidery-svg {
+  width: 2000px;
+  height: 100%;
+  position: absolute;
+}
+
+.embroidery-container.left .embroidery-svg {
+  right: -1000px; /* 将文字中心对准中缝 (2000/2) */
+}
+
+.embroidery-container.right .embroidery-svg {
+  left: -1000px; /* 将文字中心对准中缝 (2000/2) */
+}
+
+/* 文字细节 */
+.embroidery-text {
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 220px; /* 翻倍：从 60px 到 120px */
+  font-weight: bold;
+  fill: url(#goldGradient);
+  filter: url(#embroidery-filter);
+  letter-spacing: 30px; /* 间距也相应翻倍，保持比例 */
+  text-shadow: 
+    2px 2px 0px rgba(0,0,0,0.5), /* 投影也稍微加重 */
+    -1px -1px 0px rgba(255,255,255,0.1);
+}
+
+.start-screen.started .embroidery-container {
+  opacity: 0.8; /* 拉开时稍微变淡，增加动感 */
+  transition: opacity 1s ease;
 }
 
 /* 按钮文字 */
