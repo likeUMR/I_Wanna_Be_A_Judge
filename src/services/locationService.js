@@ -36,25 +36,16 @@ export const fetchAdminDivisions = async () => {
 };
 
 /**
- * 获取用户公网 IP (仅在生产环境使用，且优先使用国内极速接口)
+ * 获取用户公网 IP (优先使用国内极速接口)
  */
 const getPublicIP = async () => {
-  // 开发环境下，Vite 代理就在本地，不需要获取 IP，ip: null 即可获取正确位置
-  if (import.meta.env.DEV) return null;
-
   try {
     // 使用国内响应极快的 IP 接口 (4.ipw.cn 专门提供公网 IP 返回，纯文本格式)
     const res = await axios.get('https://4.ipw.cn', { timeout: 1500 });
     return typeof res.data === 'string' ? res.data.trim() : null;
   } catch (e) {
-    console.warn('[定位] 国内 IP 接口获取失败，尝试备用接口');
-    try {
-      // 备用接口 (ip.sb 国内可用性尚可)
-      const res = await axios.get('https://api-ipv4.ip.sb/ip', { timeout: 1500 });
-      return typeof res.data === 'string' ? res.data.trim() : null;
-    } catch (e2) {
-      return null;
-    }
+    console.warn('[定位] IP 获取失败或超时，将由接口自动识别:', e.message);
+    return null; // 失败时返回 null，接口会根据请求来源自动识别 IP
   }
 };
 
@@ -66,18 +57,13 @@ const getCoordsByIP = async () => {
   try {
     console.log('[定位] 尝试方案 1: www.mapchaxun.cn');
     
-    // 只有在非开发环境下才尝试获取公网 IP，以穿透 Nginx 代理
-    let userIP = null;
-    if (!import.meta.env.DEV) {
-      userIP = await getPublicIP();
-      console.log('[定位] 生产环境获取到的用户 IP:', userIP || '获取失败');
-    } else {
-      console.log('[定位] 开发环境，跳过公网 IP 获取');
-    }
+    // 统一逻辑：先尝试获取公网 IP，以穿透生产环境的 Nginx 代理
+    const userIP = await getPublicIP();
+    console.log('[定位] 当前识别到的公网 IP:', userIP || '自动识别');
 
     const res = await axios.post(
       '/api-mapchaxun/api/mapApi/getIpMes',
-      { ip: userIP },
+      { ip: userIP }, // 显式传递 IP 以防被服务器代理掩盖真实地址
       {
         headers: {
           'accept': 'application/json',
