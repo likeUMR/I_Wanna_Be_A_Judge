@@ -1,9 +1,10 @@
 import React from 'react';
 import './EvidenceDossier.css';
 
-const EvidenceDossier = ({ facts, evidences, children }) => {
+const EvidenceDossier = ({ facts, evidences, caseId, children }) => {
   return (
     <div className="evidence-dossier">
+      <div className="case-id-tag">{caseId}</div>
       <h2 className="dossier-title">证据与事实清单</h2>
       
       <div className="scroll-area">

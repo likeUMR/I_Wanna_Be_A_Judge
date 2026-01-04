@@ -23,17 +23,29 @@
   outline: 1.5px solid #c0392b; /* 双线效果 */
   outline-offset: -8px;
   color: #c0392b;
-  padding: 10px 20px;
+  padding: 8px 15px;
   font-weight: 900;
   transform: rotate(12deg);
-  opacity: 0.6;
-  font-size: 1.6rem;
+  opacity: 0.5;
+  font-size: 1.4rem;
   pointer-events: none;
-  letter-spacing: 6px; /* 中文字间距加大更像印章 */
+  letter-spacing: 2px;
   z-index: 10;
-  font-family: 'SimHei', sans-serif; /* 使用黑体增加严肃感 */
-  mix-blend-mode: multiply; /* 让印章与背景纸张融合，更真实 */
-  filter: contrast(1.2) sepia(0.2); /* 增加一点老化感 */
+  font-family: 'SimHei', sans-serif;
+  mix-blend-mode: multiply;
+  filter: contrast(1.2) sepia(0.2);
+  max-width: 180px;
+  text-align: center;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confidential-stamp.small-font {
+  font-size: 1.1rem;
+  padding: 6px 12px;
+  letter-spacing: 1px;
 }
 
 /* 别针效果 */

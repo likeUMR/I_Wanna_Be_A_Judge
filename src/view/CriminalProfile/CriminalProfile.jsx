@@ -1,12 +1,17 @@
 import React from 'react';
 import './CriminalProfile.css';
 
-const CriminalProfile = ({ defendant }) => {
+const CriminalProfile = ({ defendant, court }) => {
   if (!defendant) return null;
+
+  // 缩短法院名称，去掉市级及以上前缀，保留 xx区/县 人民法院
+  const displayCourt = court ? court.replace(/^.*?(?=[^市]+[区县]人民法院)/, '') : '内部档案';
 
   return (
     <div className="criminal-profile-card">
-      <div className="confidential-stamp">内部档案</div>
+      <div className={`confidential-stamp ${displayCourt.length > 8 ? 'small-font' : ''}`}>
+        {displayCourt}
+      </div>
       
       <div className="avatar-placeholder">
         <div className="avatar-icon">👤</div>

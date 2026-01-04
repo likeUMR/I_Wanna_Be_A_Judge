@@ -31,6 +31,21 @@
   color: #333;
   border-bottom: 1px double #ccc;
   padding-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.case-id-tag {
+  position: absolute;
+  top: 2.5rem; /* 与标题顶部对齐 */
+  right: 2.5rem;
+  font-family: 'SimSun', 'STSong', serif;
+  font-size: 0.85rem;
+  color: #888;
+  padding: 4px 12px;
+  border: 1px dashed #ddd; /* 增加虚线框，与主题适配 */
+  background: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+  letter-spacing: 1px;
 }
 
 .scroll-area {

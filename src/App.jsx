@@ -187,7 +187,10 @@ function App() {
               {!showFeedback ? (
                 <div className="trial-layout">
                   <div className="left-panel">
-                    <CriminalProfile defendant={currentCase.defendant} />
+                    <CriminalProfile 
+                      defendant={currentCase.defendant} 
+                      court={currentCase.court}
+                    />
                     <JudgeRankStatus 
                       rankInfo={rankInfo} 
                       totalScore={totalScore} 
@@ -198,6 +201,7 @@ function App() {
                   
                   <div className="center-panel">
                     <EvidenceDossier 
+                      caseId={currentCase.id}
                       facts={currentCase.facts} 
                       evidences={currentCase.evidences} 
                     >
