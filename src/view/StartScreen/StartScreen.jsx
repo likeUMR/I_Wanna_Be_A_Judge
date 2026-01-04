@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { storageService } from '../../services/storageService';
 import './StartScreen.css';
 
 /**
@@ -10,9 +11,10 @@ import './StartScreen.css';
  */
 const StartScreen = ({ isReady, status, onStart, onOpening }) => {
   const [isStarted, setIsStarted] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleStart = () => {
-    if (!isReady) return;
+    if (!isReady || showConfirm) return;
     setIsStarted(true);
     if (onOpening) onOpening();
     
@@ -20,6 +22,12 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
     setTimeout(() => {
       onStart();
     }, 1500);
+  };
+
+  const handleClearHistory = () => {
+    storageService.clear();
+    setShowConfirm(false);
+    window.location.reload(); // 刷新页面以重置所有状态
   };
 
   // 刺绣文字内容
@@ -61,6 +69,16 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
           <div className="embroidery-container right">
             <TitleSVG />
           </div>
+          
+          {/* 清除存档按钮 - 火漆印章风格 */}
+          {!isStarted && (
+            <div className="seal-button-container">
+              <button className="seal-button" onClick={() => setShowConfirm(true)}>
+                <div className="seal-icon">废</div>
+                <div className="seal-text">清除存档</div>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -68,7 +86,7 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
         <button 
           className={`gavel-icon-btn ${!isReady ? 'loading' : ''}`} 
           onClick={handleStart}
-          disabled={!isReady}
+          disabled={!isReady || showConfirm}
         >
           <img src="/favicon.svg" alt="法槌图标" />
           <span className="start-btn-text">
@@ -77,6 +95,22 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
         </button>
         <p className="loading-status">{status}</p>
       </div>
+
+      {/* 复古确认弹窗 */}
+      {showConfirm && (
+        <div className="vintage-modal-overlay">
+          <div className="vintage-modal">
+            <div className="modal-paper">
+              <h3>⚠️ 档案清理确认</h3>
+              <p>您确定要焚毁所有的审判记录和荣誉存档吗？此操作不可撤销，法官职业生涯将重新开始。</p>
+              <div className="modal-actions">
+                <button className="modal-btn confirm" onClick={handleClearHistory}>确认焚毁</button>
+                <button className="modal-btn cancel" onClick={() => setShowConfirm(false)}>暂且保留</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

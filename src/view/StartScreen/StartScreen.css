@@ -214,6 +214,154 @@
   transition: opacity 1s ease;
 }
 
+/* 火漆印章按钮 */
+.seal-button-container {
+  position: absolute;
+  right: 100px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2200;
+}
+
+.seal-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+  padding: 15px;
+}
+
+.seal-button:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.seal-icon {
+  width: 70px;
+  height: 70px;
+  background-color: #4a2c2a; /* 深木色/火漆色 */
+  border: 4px solid #3a1c1a;
+  border-radius: 50%;
+  color: #e0c097;
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 
+    inset 0 0 15px rgba(0,0,0,0.6),
+    3px 3px 10px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 火漆不规则边缘模拟 */
+.seal-icon::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 8px solid rgba(74, 44, 42, 0.4);
+  border-radius: 48%;
+  pointer-events: none;
+}
+
+.seal-text {
+  margin-top: 10px;
+  font-family: 'SimSun', serif;
+  font-size: 0.9rem;
+  color: #e0c097;
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+/* 复古确认弹窗 */
+.vintage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  backdrop-filter: blur(5px);
+}
+
+.vintage-modal {
+  width: 450px;
+  padding: 40px;
+  background: #f4e4bc; /* 宣纸色 */
+  background-image: url('/assets/textures/wood-pattern.png'); /* 复用纹理增强质感 */
+  border: 12px double #8b4513;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+.modal-paper {
+  text-align: center;
+  color: #3e2723;
+}
+
+.modal-paper h3 {
+  font-family: 'STKaiti', 'KaiTi', serif;
+  font-size: 1.8rem;
+  margin-top: 0;
+  color: #8b0000;
+  border-bottom: 2px solid #8b4513;
+  padding-bottom: 15px;
+}
+
+.modal-paper p {
+  font-family: 'SimSun', serif;
+  line-height: 1.8;
+  margin: 25px 0;
+  font-size: 1.1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 10px 25px;
+  font-family: 'SimSun', serif;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid #8b4513;
+  transition: all 0.2s;
+}
+
+.modal-btn.confirm {
+  background: #8b0000;
+  color: #fff;
+}
+
+.modal-btn.confirm:hover {
+  background: #a00000;
+  box-shadow: 0 0 15px rgba(139, 0, 0, 0.4);
+}
+
+.modal-btn.cancel {
+  background: #d2b48c;
+  color: #3e2723;
+}
+
+.modal-btn.cancel:hover {
+  background: #e2c49c;
+}
+
 /* 按钮文字 */
 .start-btn-text {
   display: block;
