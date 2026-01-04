@@ -1,8 +1,9 @@
 import React from 'react';
 import './JudgeRankStatus.css';
 
-const JudgeRankStatus = ({ rankInfo, totalScore, scoreChange }) => {
+const JudgeRankStatus = ({ rankInfo, totalScore, scoreChange, statistics }) => {
   const { current, next, progress } = rankInfo;
+  const { totalCases, averageScore, bestScore } = statistics || { totalCases: 0, averageScore: 0, bestScore: 0 };
 
   return (
     <div className="judge-rank-status">
@@ -26,6 +27,21 @@ const JudgeRankStatus = ({ rankInfo, totalScore, scoreChange }) => {
         </div>
         <div className="next-rank-hint">
           {next ? `距离 ${next.name} 还需要 ${next.minScore - totalScore} 分` : '已达最高级别'}
+        </div>
+      </div>
+
+      <div className="stats-sidebar">
+        <div className="stat-row">
+          <span className="stat-label">结案总数</span>
+          <span className="stat-value">{totalCases}</span>
+        </div>
+        <div className="stat-row">
+          <span className="stat-label">平均评分</span>
+          <span className="stat-value">{averageScore}</span>
+        </div>
+        <div className="stat-row">
+          <span className="stat-label">历史最高</span>
+          <span className="stat-value">{bestScore}</span>
         </div>
       </div>
     </div>

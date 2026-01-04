@@ -6,8 +6,27 @@ export class HistoryService {
   static KEYS = {
     TOTAL_SCORE: 'judge_total_score',
     PLAYED_CASE_IDS: 'played_case_ids',
-    GAME_HISTORY: 'judge_game_history'
+    GAME_HISTORY: 'judge_game_history',
+    TOTAL_CASES: 'judge_total_cases',
+    TOTAL_SUM_SCORE: 'judge_total_sum_score',
+    BEST_SCORE: 'judge_best_score'
   };
+
+  /**
+   * 获取统计数据
+   * @param {Object} storage 存储引擎接口
+   */
+  static getStatistics(storage) {
+    const totalCases = storage.getItem(this.KEYS.TOTAL_CASES, 0);
+    const totalSumScore = storage.getItem(this.KEYS.TOTAL_SUM_SCORE, 0);
+    const bestScore = storage.getItem(this.KEYS.BEST_SCORE, 0);
+
+    return {
+      totalCases,
+      averageScore: totalCases > 0 ? Math.round(totalSumScore / totalCases) : 0,
+      bestScore
+    };
+  }
 
   /**
    * 获取当前总分
@@ -56,6 +75,7 @@ export class HistoryService {
    * @param {Object} record 判决记录
    */
   static recordJudgment(storage, record) {
+    // 记录详细历史
     const history = storage.getItem(this.KEYS.GAME_HISTORY, []);
     history.push({
       ...record,
@@ -64,6 +84,16 @@ export class HistoryService {
     // 只保留最近 100 条详细记录
     if (history.length > 100) history.shift();
     storage.setItem(this.KEYS.GAME_HISTORY, history);
+
+    // 更新统计指标
+    const totalCases = storage.getItem(this.KEYS.TOTAL_CASES, 0) + 1;
+    const totalSumScore = storage.getItem(this.KEYS.TOTAL_SUM_SCORE, 0) + record.score;
+    const currentBest = storage.getItem(this.KEYS.BEST_SCORE, 0);
+    const bestScore = Math.max(currentBest, record.score);
+
+    storage.setItem(this.KEYS.TOTAL_CASES, totalCases);
+    storage.setItem(this.KEYS.TOTAL_SUM_SCORE, totalSumScore);
+    storage.setItem(this.KEYS.BEST_SCORE, bestScore);
   }
 
   /**

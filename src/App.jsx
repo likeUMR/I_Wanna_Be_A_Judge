@@ -54,6 +54,7 @@ function App() {
     totalScore,
     scoreChange,
     rankInfo,
+    statistics,
     loadCase,
     submitJudgment,
     updateJudgment,
@@ -145,7 +146,12 @@ function App() {
                 <div className="trial-layout">
                   <div className="left-panel">
                     <CriminalProfile defendant={currentCase.defendant} />
-                    <JudgeRankStatus rankInfo={rankInfo} totalScore={totalScore} scoreChange={scoreChange} />
+                    <JudgeRankStatus 
+                      rankInfo={rankInfo} 
+                      totalScore={totalScore} 
+                      scoreChange={scoreChange} 
+                      statistics={statistics}
+                    />
                   </div>
                   
                   <div className="center-panel">

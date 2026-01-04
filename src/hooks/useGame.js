@@ -20,6 +20,9 @@ export const useGame = (initialAdcode) => {
   });
 
   const [scoreChange, setScoreChange] = useState(0);
+  const [statistics, setStatistics] = useState(() => {
+    return HistoryService.getStatistics(storageService);
+  });
 
   useEffect(() => {
     HistoryService.saveTotalScore(storageService, totalScore);
@@ -60,6 +63,9 @@ export const useGame = (initialAdcode) => {
       cause: currentCase.cause
     });
     
+    // 更新统计数据
+    setStatistics(HistoryService.getStatistics(storageService));
+    
     setScoring(result);
     setShowFeedback(true);
   }, [currentCase, playerJudgment, totalScore]);
@@ -98,6 +104,7 @@ export const useGame = (initialAdcode) => {
     totalScore,
     scoreChange,
     rankInfo,
+    statistics,
     loadCase,
     submitJudgment,
     updateJudgment,
