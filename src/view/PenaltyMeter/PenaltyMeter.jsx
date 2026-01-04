@@ -2,6 +2,26 @@ import React from 'react';
 import './PenaltyMeter.css';
 
 const PenaltyMeter = ({ hasFine, fineAmount, onChange }) => {
+  // 使用本地状态同步滑块，解决在缩放容器中频繁重绘导致的失焦问题
+  const [localAmount, setLocalAmount] = React.useState(fineAmount);
+
+  // 同步外部变化（如点击快速按钮）
+  React.useEffect(() => {
+    setLocalAmount(fineAmount);
+  }, [fineAmount]);
+
+  const handleSliderChange = (e) => {
+    const val = parseInt(e.target.value, 10);
+    setLocalAmount(val);
+    onChange('fineAmount', val);
+  };
+
+  const handleInputChange = (e) => {
+    const val = parseInt(e.target.value, 10) || 0;
+    setLocalAmount(val);
+    onChange('fineAmount', val);
+  };
+
   return (
     <div className="penalty-meter">
       <div className="meter-header">
@@ -22,10 +42,11 @@ const PenaltyMeter = ({ hasFine, fineAmount, onChange }) => {
             <span className="currency">¥</span>
             <input 
               type="number" 
-              value={fineAmount} 
-              onChange={(e) => onChange('fineAmount', e.target.value)}
+              value={localAmount} 
+              onChange={handleInputChange}
               step="500"
               min="0"
+              max="50000"
             />
           </div>
           
@@ -45,10 +66,10 @@ const PenaltyMeter = ({ hasFine, fineAmount, onChange }) => {
             type="range" 
             className="fine-slider"
             min="0" 
-            max="100000" 
+            max="50000" 
             step="500"
-            value={fineAmount}
-            onChange={(e) => onChange('fineAmount', e.target.value)}
+            value={localAmount}
+            onChange={handleSliderChange}
           />
         </div>
       )}

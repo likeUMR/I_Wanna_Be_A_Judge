@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAssets } from './hooks/useAssets'
 import { useGame } from './hooks/useGame'
 
@@ -82,11 +82,46 @@ function App() {
     }
   }
 
+  // 内部结案状态同步，用于控制 App 层的法槌按钮和 Feedback 层的印章
+  const [isSealed, setIsSealed] = useState(false);
+
+  // 当反馈关闭时，重置结案状态
+  useEffect(() => {
+    if (!showFeedback) {
+      setIsSealed(false);
+    }
+  }, [showFeedback]);
+
+  const handleNextCase = useCallback(() => {
+    if (isSealed) return;
+    setIsSealed(true);
+    // 延迟 1.5s 进入下一案，给印章动画留出时间
+    setTimeout(() => {
+      loadCase(currentLocation?.adcode || '110101');
+    }, 600);
+  }, [isSealed, loadCase, currentLocation]);
+
   // 错误合并
   const error = assetError || gameError;
 
+  // 缓存容器样式，避免因对象引用变动导致浏览器重新计算变换而使滑块失焦
+  const containerStyle = useMemo(() => ({
+    transform: `scale(${scale})`,
+    width: '1920px',
+    height: '960px',
+    transformOrigin: 'top center',
+    visibility: 'visible',
+    filter: isOpening ? 'none' : 'brightness(0.5)',
+    transition: 'filter 1.5s ease'
+  }), [scale, isOpening]);
+
   return (
     <div className="app-viewport">
+      {/* 预加载关键图标，防止加载延迟 */}
+      <div style={{ display: 'none', visibility: 'hidden', position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <img src="favicon.svg" alt="preload-gavel" />
+      </div>
+
       {!gameStarted && (
         <StartScreen 
           isReady={isReady} 
@@ -98,19 +133,25 @@ function App() {
 
       <div 
         className="app-container" 
-        style={{ 
-          transform: `scale(${scale})`,
-          width: '1920px',
-          height: '960px',
-          transformOrigin: 'top center',
-          visibility: 'visible', /* 始终可见，由 StartScreen 遮盖 */
-          filter: isOpening ? 'none' : 'brightness(0.5)', /* 未开始时变暗 */
-          transition: 'filter 1.5s ease'
-        }}
+        style={containerStyle}
       >
+        {/* 庄重版法槌控件 - 现在位于 App 层级，绝对不受内部滚动影响 */}
+        {showFeedback && (
+          <div 
+            className={`gavel-action-container ${isSealed ? 'sealed' : ''}`} 
+            onClick={handleNextCase} 
+            title="敲击法槌以结案"
+          >
+            <div className="gavel-action-icon">
+              <img src="favicon.svg" alt="法槌" />
+            </div>
+            <div className="gavel-action-hint">结案</div>
+          </div>
+        )}
+
         <header className="game-header">
           <div className="header-left">
-            <div className="logo">⚖️ I Wanna Be A Judge</div>
+            <div className="logo">⚖️ 我 要 当 法 官</div>
           </div>
           <div className="header-center">
             {currentCase ? (
@@ -250,7 +291,7 @@ function App() {
                 scoring={scoring}
                 scoreChange={scoreChange}
                 rankInfo={rankInfo}
-                onNextCase={() => loadCase(currentLocation?.adcode || '110101')}
+                isSealed={isSealed}
               />
             )}
           </div>

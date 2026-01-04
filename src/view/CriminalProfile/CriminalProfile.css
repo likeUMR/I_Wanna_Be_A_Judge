@@ -19,17 +19,21 @@
   position: absolute;
   top: 40px;
   right: 20px;
-  border: 5px double #c0392b;
+  border: 4px solid #c0392b;
+  outline: 1.5px solid #c0392b; /* 双线效果 */
+  outline-offset: -8px;
   color: #c0392b;
-  padding: 5px 15px;
+  padding: 10px 20px;
   font-weight: 900;
-  transform: rotate(15deg); /* 改回正向倾斜 */
-  opacity: 0.5;
-  font-size: 1.4rem;
+  transform: rotate(12deg);
+  opacity: 0.6;
+  font-size: 1.6rem;
   pointer-events: none;
-  border-radius: 5px;
-  letter-spacing: 2px;
-  z-index: 10; /* 确保印章盖在头像最上面 */
+  letter-spacing: 6px; /* 中文字间距加大更像印章 */
+  z-index: 10;
+  font-family: 'SimHei', sans-serif; /* 使用黑体增加严肃感 */
+  mix-blend-mode: multiply; /* 让印章与背景纸张融合，更真实 */
+  filter: contrast(1.2) sepia(0.2); /* 增加一点老化感 */
 }
 
 /* 别针效果 */

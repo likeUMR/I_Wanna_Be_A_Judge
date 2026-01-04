@@ -20,6 +20,9 @@ export const useGame = (initialAdcode) => {
   });
 
   const [scoreChange, setScoreChange] = useState(0);
+  const [nextCase, setNextCase] = useState(null);
+  const [preloading, setPreloading] = useState(false);
+  
   const [statistics, setStatistics] = useState(() => {
     return HistoryService.getStatistics(storageService);
   });
@@ -29,6 +32,16 @@ export const useGame = (initialAdcode) => {
   }, [totalScore]);
 
   const loadCase = useCallback(async (adcode) => {
+    // 如果已经有预加载好的案例，直接使用
+    if (nextCase) {
+      setCurrentCase(nextCase);
+      setNextCase(null);
+      setShowFeedback(false);
+      setPlayerJudgment(new Judgment());
+      setScoreChange(0);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setShowFeedback(false);
@@ -42,7 +55,21 @@ export const useGame = (initialAdcode) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [nextCase]);
+
+  // 预加载逻辑
+  const preloadNextCase = useCallback(async (adcode) => {
+    if (preloading || nextCase) return;
+    setPreloading(true);
+    try {
+      const caseObj = await CaseLoader.loadRandomCase(adcode);
+      setNextCase(caseObj);
+    } catch (err) {
+      console.warn('Preload failed:', err);
+    } finally {
+      setPreloading(false);
+    }
+  }, [preloading, nextCase]);
 
   const submitJudgment = useCallback(() => {
     if (!currentCase) return;
@@ -68,7 +95,10 @@ export const useGame = (initialAdcode) => {
     
     setScoring(result);
     setShowFeedback(true);
-  }, [currentCase, playerJudgment, totalScore]);
+
+    // 提交后立即开始预加载下一个案例
+    preloadNextCase(currentCase.adCode || '110101');
+  }, [currentCase, playerJudgment, totalScore, preloadNextCase]);
 
   const updateJudgment = useCallback((updates) => {
     setPlayerJudgment(prev => {

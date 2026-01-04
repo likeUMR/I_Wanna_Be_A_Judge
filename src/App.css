@@ -308,3 +308,72 @@ body {
   max-width: 500px;
   margin: 100px auto;
 }
+
+/* 庄重版法槌控件 - 独立的 UI 控件，放在 App 层级以确保真正固定且提前加载 */
+.gavel-action-container {
+  position: fixed;
+  /* 使用 vw 确保在不同分辨率下位置一致，且靠右边缘 */
+  right: 3vw; 
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8vw; /* 响应式宽度 */
+  height: 8vw; /* 响应式高度 */
+  min-width: 140px;
+  min-height: 140px;
+  max-width: 180px;
+  max-height: 180px;
+  background: radial-gradient(circle, #3d2b1f 0%, #2c1810 100%);
+  border: 8px solid #8d6e63;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 1vw 3vw rgba(0, 0, 0, 0.8), inset 0 0 2vw rgba(0,0,0,0.5);
+  z-index: 5000; /* 极高层级，独立于所有内容 */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gavel-action-container:hover {
+  border-color: #ffd54f;
+  box-shadow: 0 1.5vw 4vw rgba(0, 0, 0, 0.9), 0 0 1.5vw rgba(255, 213, 79, 0.4);
+  transform: translateY(-52%) scale(1.05);
+}
+
+.gavel-action-container:active {
+  transform: translateY(-48%) scale(0.95);
+  box-shadow: 0 0.5vw 1vw rgba(0, 0, 0, 0.7);
+}
+
+.gavel-action-icon {
+  width: 50%;
+  height: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gavel-action-icon img {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 0.5vw rgba(255, 213, 79, 0.5));
+}
+
+.gavel-action-hint {
+  color: #ffd54f;
+  font-size: 1.2vw;
+  font-weight: 900;
+  letter-spacing: 0.5vw;
+  text-shadow: 0 0.2vw 0.4vw rgba(0,0,0,0.6);
+  font-family: 'SimHei', sans-serif;
+  margin-top: 0.5vw;
+  margin-left: 0.5vw;
+}
+
+/* 已结案时的状态 */
+.gavel-action-container.sealed {
+  pointer-events: none;
+  opacity: 0.3;
+  filter: grayscale(1);
+}

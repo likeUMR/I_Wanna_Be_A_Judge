@@ -6,7 +6,7 @@ const CriminalProfile = ({ defendant }) => {
 
   return (
     <div className="criminal-profile-card">
-      <div className="confidential-stamp">CONFIDENTIAL</div>
+      <div className="confidential-stamp">内部档案</div>
       
       <div className="avatar-placeholder">
         <div className="avatar-icon">👤</div>
@@ -36,7 +36,7 @@ const CriminalProfile = ({ defendant }) => {
         </div>
         
         <div className="legal-status-section">
-          <h3 className="section-subtitle">生理状态 (Physiological Status)</h3>
+          <h3 className="section-subtitle">生理状态</h3>
           <div className="tags-container">
             {defendant.isMinor && <span className="tag blue">未成年</span>}
             <span className="tag purple">{defendant.physiologicalStatus}</span>
@@ -44,7 +44,7 @@ const CriminalProfile = ({ defendant }) => {
         </div>
 
         <div className="history-section">
-          <h3 className="section-subtitle">历史战绩 (Criminal Record)</h3>
+          <h3 className="section-subtitle">历史战绩</h3>
           <p className="record-text">{defendant.criminalRecord}</p>
         </div>
       </div>
