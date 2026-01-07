@@ -71,6 +71,15 @@ export const useGame = (initialAdcode) => {
     }
   }, [preloading, nextCase]);
 
+  // 当 currentCase 变化且没有 nextCase 时，立即开始预加载下一个案例
+  useEffect(() => {
+    if (currentCase && !nextCase && !preloading) {
+      // 这里的 adcode 优先使用当前案例的，作为兜底使用初始值或默认值
+      const targetAdcode = currentCase.adCode || initialAdcode || '110101';
+      preloadNextCase(targetAdcode);
+    }
+  }, [currentCase, nextCase, preloading, preloadNextCase, initialAdcode]);
+
   const submitJudgment = useCallback(() => {
     if (!currentCase) return;
     const result = ScoringService.score(currentCase, playerJudgment);
@@ -95,10 +104,7 @@ export const useGame = (initialAdcode) => {
     
     setScoring(result);
     setShowFeedback(true);
-
-    // 提交后立即开始预加载下一个案例
-    preloadNextCase(currentCase.adCode || '110101');
-  }, [currentCase, playerJudgment, totalScore, preloadNextCase]);
+  }, [currentCase, playerJudgment, totalScore]);
 
   const updateJudgment = useCallback((updates) => {
     setPlayerJudgment(prev => {

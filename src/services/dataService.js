@@ -4,6 +4,7 @@ import { storageService } from './storageService';
 import { HistoryService } from '../core/services/HistoryService';
 
 let blocksManifest = null;
+const csvCache = new Map(); // 缓存已加载并解析的 CSV 数据: url -> Array of objects
 
 /**
  * 加载分片清单
@@ -66,6 +67,13 @@ const tryBlockAndPick = async (adcode, type, blockNum, playedIds, ignorePlayed =
     ? `data/perfect/${adcode}_perfect_${blockNumStr}.csv`
     : `data/${adcode}_filtered_${blockNumStr}.csv`;
 
+  // 优先从缓存获取
+  if (csvCache.has(url)) {
+    const cachedData = csvCache.get(url);
+    const selected = pickNewCase(cachedData, playedIds, ignorePlayed);
+    return selected;
+  }
+
   try {
     const response = await axios.get(url, { responseType: 'text' });
     let csvData = response.data;
@@ -74,18 +82,13 @@ const tryBlockAndPick = async (adcode, type, blockNum, playedIds, ignorePlayed =
       csvData = csvData.slice(1);
     }
     
-    return new Promise((resolve, reject) => {
+    const results = await new Promise((resolve, reject) => {
       Papa.parse(csvData, {
         header: true,
         skipEmptyLines: 'greedy',
         trimHeaders: true,
         complete: (results) => {
-          if (results.data && results.data.length > 0) {
-            const selected = pickNewCase(results.data, playedIds, ignorePlayed);
-            resolve(selected);
-          } else {
-            resolve(null);
-          }
+          resolve(results.data);
         },
         error: (error) => {
           console.error(`CSV 解析出错 (${url}):`, error);
@@ -93,6 +96,14 @@ const tryBlockAndPick = async (adcode, type, blockNum, playedIds, ignorePlayed =
         }
       });
     });
+
+    if (results && results.length > 0) {
+      // 存入缓存
+      csvCache.set(url, results);
+      return pickNewCase(results, playedIds, ignorePlayed);
+    }
+    return null;
+
   } catch (error) {
     if (error.response && error.response.status === 404) {
       return null;

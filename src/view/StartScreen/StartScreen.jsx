@@ -9,7 +9,7 @@ import './StartScreen.css';
  * @param {function} onStart 点击开始后的回调
  * @param {function} onOpening 开始拉开帷幕的回调
  */
-const StartScreen = ({ isReady, status, onStart, onOpening }) => {
+const StartScreen = ({ isReady, status, onStart, onOpening, scale }) => {
   const [isStarted, setIsStarted] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -71,46 +71,64 @@ const StartScreen = ({ isReady, status, onStart, onOpening }) => {
           </div>
           
           {/* 清除存档按钮 - 火漆印章风格 */}
-          {!isStarted && (
-            <div className="seal-button-container">
-              <button className="seal-button" onClick={() => setShowConfirm(true)}>
-                <div className="seal-icon">废</div>
-                <div className="seal-text">清除存档</div>
-              </button>
-            </div>
-          )}
+          <div className={`seal-button-container ${isStarted ? 'fading-out' : ''}`}>
+            <button className="seal-button" onClick={() => setShowConfirm(true)}>
+              <div className="seal-icon">废</div>
+              <div className="seal-text">清除存档</div>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="start-content">
-        <button 
-          className={`gavel-icon-btn ${!isReady ? 'loading' : ''}`} 
-          onClick={handleStart}
-          disabled={!isReady || showConfirm}
-        >
-          <img src="favicon.svg" alt="法槌图标" />
-          <span className="start-btn-text">
-            {isReady ? '开启审判' : '正在准备'}
-          </span>
-        </button>
-        <p className="loading-status">{status}</p>
-      </div>
+      <div 
+        className="start-screen-container"
+        style={{
+          transform: `translate(-50%, -50%) scale(${(scale / 2) * 1.5 * 0.88})`, // 针对 4K 屏幕设计稿放大 1.5 倍，再按要求缩小至 0.88 倍
+          transformOrigin: 'center center',
+          width: '3840px',
+          height: '1920px',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexShrink: 0,
+          pointerEvents: isStarted ? 'none' : 'auto',
+          backfaceVisibility: 'hidden',
+          WebkitFontSmoothing: 'antialiased'
+        }}
+      >
+        <div className="start-content">
+          <button 
+            className={`gavel-icon-btn ${!isReady ? 'loading' : ''}`} 
+            onClick={handleStart}
+            disabled={!isReady || showConfirm}
+          >
+            <img src="favicon.svg" alt="法槌图标" />
+            <span className="start-btn-text">
+              {isReady ? '开启审判' : '正在准备'}
+            </span>
+          </button>
+          <p className="loading-status">{status}</p>
+        </div>
 
-      {/* 复古确认弹窗 */}
-      {showConfirm && (
-        <div className="vintage-modal-overlay">
-          <div className="vintage-modal">
-            <div className="modal-paper">
-              <h3>⚠️ 档案清理确认</h3>
-              <p>您确定要焚毁所有的审判记录和荣誉存档吗？此操作不可撤销，法官职业生涯将重新开始。</p>
-              <div className="modal-actions">
-                <button className="modal-btn confirm" onClick={handleClearHistory}>确认焚毁</button>
-                <button className="modal-btn cancel" onClick={() => setShowConfirm(false)}>暂且保留</button>
+        {/* 复古确认弹窗 */}
+        {showConfirm && (
+          <div className="vintage-modal-overlay">
+            <div className="vintage-modal">
+              <div className="modal-paper">
+                <h3>⚠️ 档案清理确认</h3>
+                <p>您确定要焚毁所有的审判记录和荣誉存档吗？此操作不可撤销，法官职业生涯将重新开始。</p>
+                <div className="modal-actions">
+                  <button className="modal-btn confirm" onClick={handleClearHistory}>确认焚毁</button>
+                  <button className="modal-btn cancel" onClick={() => setShowConfirm(false)}>暂且保留</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

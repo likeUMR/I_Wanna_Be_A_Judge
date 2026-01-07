@@ -106,13 +106,15 @@ function App() {
 
   // 缓存容器样式，避免因对象引用变动导致浏览器重新计算变换而使滑块失焦
   const containerStyle = useMemo(() => ({
-    transform: `scale(${scale})`,
+    transform: `scale(${scale}) translateZ(0)`, // 增加 translateZ(0) 开启硬件加速，提升缩放后的清晰度
     width: '1920px',
     height: '960px',
     transformOrigin: 'top center',
     visibility: 'visible',
     filter: isOpening ? 'none' : 'brightness(0.5)',
-    transition: 'filter 1.5s ease'
+    transition: 'filter 1.5s ease',
+    backfaceVisibility: 'hidden',
+    WebkitFontSmoothing: 'antialiased'
   }), [scale, isOpening]);
 
   return (
@@ -128,6 +130,7 @@ function App() {
           status={loadingStatus} 
           onOpening={() => setIsOpening(true)}
           onStart={() => setGameStarted(true)} 
+          scale={scale}
         />
       )}
 

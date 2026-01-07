@@ -8,7 +8,8 @@ body {
   margin: 0;
   padding: 0;
   background-color: #1a1a1a;
-  color: #333;
+  color: #e0c097; /* 默认使用浅色文字以适应深色背景 */
+  font-family: 'SimSun', 'STSong', 'STKaiti', 'KaiTi', serif;
   overflow: hidden; /* 防止出现滚动条 */
 }
 
@@ -45,7 +46,9 @@ body {
   flex-shrink: 0;
   position: relative;
   /* 移除内阴影，由 viewport 处理 */
-  will-change: transform; /* 优化缩放性能 */
+  /* will-change: transform; 在某些浏览器会导致缩放时位图化，产生模糊，已移至 inline style 中优化 */
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 .game-header {
