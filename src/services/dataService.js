@@ -22,6 +22,19 @@ export const loadManifest = async () => {
 };
 
 /**
+ * 加载罪名统计数据
+ */
+export const fetchCrimes = async () => {
+  try {
+    const res = await axios.get('crimes.json');
+    return res.data;
+  } catch (e) {
+    console.warn('[数据] 加载罪名数据失败:', e.message);
+    return [];
+  }
+};
+
+/**
  * 辅助函数：获取已玩过的案例ID列表
  */
 const getPlayedCases = () => {
@@ -121,6 +134,11 @@ export const getRandomCaseByAdcode = async (adcode) => {
   const playedIds = getPlayedCases();
   const adcodeStr = String(adcode);
   const manifest = await loadManifest();
+  
+  if (!manifest) {
+    throw new Error('无法加载分片清单，请检查数据完整性');
+  }
+
   const info = manifest[adcodeStr] || { p: 0, f: 0 };
 
   // 辅助函数：随机尝试所有 block

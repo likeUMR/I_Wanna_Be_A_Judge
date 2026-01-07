@@ -51,13 +51,16 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
               <div className="comp-col">
                 <label>玩家</label>
                 <div className={`val ${breakdown.charge.isCorrect ? 'correct' : 'wrong'}`}>
-                  {playerJudgment.charge}
+                  {playerJudgment.charge || '无罪'}
                 </div>
               </div>
               <div className="comp-col">
                 <label>实际</label>
                 <div className="val actual">{caseObj.actualJudgment.charge}</div>
               </div>
+            </div>
+            <div className="deviation-note">
+              {breakdown.charge.isCorrect ? '判定准确' : '判定有误'}
             </div>
           </div>
 

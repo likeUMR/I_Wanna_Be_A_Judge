@@ -37,65 +37,35 @@ export const useAssets = () => {
       // 2. 核心纹理加载 (必须成功)
       setLoadingStatus('正在布置法庭背景...');
       await new Promise((resolve, reject) => {
-        const remoteUrl = 'https://www.transparenttextures.com/patterns/wood-pattern.png';
         const localUrl = 'assets/textures/wood-pattern.png';
         const img = new Image();
-        img.crossOrigin = "anonymous"; // 增加跨域支持
         
-        let isTryingLocal = false;
-        let resolved = false;
-
-        // 设置 1s 超时
-        const timer = setTimeout(() => {
-          if (!resolved && !isTryingLocal) {
-            console.warn('[初始化] 外部纹理下载超时，尝试加载本地资源');
-            isTryingLocal = true;
-            img.src = localUrl;
-          }
-        }, 1000);
-
-          img.onload = async () => {
-            if (!resolved) {
-              // 确保图片确实有宽高（已完全解码）
-              if (img.complete && img.naturalWidth > 0) {
-                try {
-                  // 强制解码，确保图片已准备好渲染
-                  if (img.decode) {
-                    await img.decode();
-                  }
-                  
-                  // 将加载成功的纹理应用到全局 CSS 变量
-                  document.documentElement.style.setProperty('--bg-texture', `url("${img.src}")`);
-                  
-                  resolved = true;
-                  clearTimeout(timer);
-                  resolve(img);
-                } catch (e) {
-                  console.warn('[初始化] 解码失败，直接返回:', e);
-                  resolved = true;
-                  clearTimeout(timer);
-                  resolve(img);
-                }
+        img.onload = async () => {
+          // 确保图片确实有宽高（已完全解码）
+          if (img.complete && img.naturalWidth > 0) {
+            try {
+              // 强制解码，确保图片已准备好渲染
+              if (img.decode) {
+                await img.decode();
               }
-            }
-          };
-
-        img.onerror = () => {
-          if (!resolved) {
-            if (!isTryingLocal) {
-              console.warn('[初始化] 外部纹理加载失败，尝试加载本地资源');
-              isTryingLocal = true;
-              img.src = localUrl;
-            } else {
-              console.error('[初始化] 纹理加载完全失败');
-              resolved = true;
-              clearTimeout(timer);
-              reject(new Error('背景纹理加载失败，无法进入法庭'));
+              
+              // 将加载成功的纹理应用到全局 CSS 变量
+              document.documentElement.style.setProperty('--bg-texture', `url("${img.src}")`);
+              
+              resolve(img);
+            } catch (e) {
+              console.warn('[初始化] 解码失败，直接返回:', e);
+              resolve(img);
             }
           }
         };
 
-        img.src = remoteUrl; // 移除时间戳，确保与 CSS 中的 URL 一致以利用缓存
+        img.onerror = () => {
+          console.error('[初始化] 纹理加载完全失败');
+          reject(new Error('背景纹理加载失败，无法进入法庭'));
+        };
+
+        img.src = localUrl;
       });
 
       setLoadingStatus('法庭布置完毕');

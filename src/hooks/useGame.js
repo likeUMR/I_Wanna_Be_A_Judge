@@ -3,8 +3,10 @@ import { CaseLoader } from '../core/services/CaseLoader';
 import { ScoringService } from '../core/services/ScoringService';
 import { RankService } from '../core/services/RankService';
 import { HistoryService } from '../core/services/HistoryService';
+import { LegalService } from '../core/services/LegalService';
 import { Judgment } from '../core/models/Judgment';
 import { storageService } from '../services/storageService';
+import { fetchCrimes } from '../services/dataService';
 
 export const useGame = (initialAdcode) => {
   const [currentCase, setCurrentCase] = useState(null);
@@ -27,6 +29,13 @@ export const useGame = (initialAdcode) => {
     return HistoryService.getStatistics(storageService);
   });
 
+  const [allCrimes, setAllCrimes] = useState([]);
+  
+  // 初始化加载罪名库
+  useEffect(() => {
+    fetchCrimes().then(setAllCrimes);
+  }, []);
+
   useEffect(() => {
     HistoryService.saveTotalScore(storageService, totalScore);
   }, [totalScore]);
@@ -34,6 +43,10 @@ export const useGame = (initialAdcode) => {
   const loadCase = useCallback(async (adcode) => {
     // 如果已经有预加载好的案例，直接使用
     if (nextCase) {
+      // 如果预加载时还没生成选项，这里生成
+      if (!nextCase.crimeOptions && allCrimes.length > 0) {
+        nextCase.crimeOptions = LegalService.getCrimeOptions(nextCase.actualJudgment.charge, allCrimes);
+      }
       setCurrentCase(nextCase);
       setNextCase(null);
       setShowFeedback(false);
@@ -49,13 +62,17 @@ export const useGame = (initialAdcode) => {
     setScoreChange(0);
     try {
       const caseObj = await CaseLoader.loadRandomCase(adcode);
+      // 生成罪名选项
+      if (allCrimes.length > 0) {
+        caseObj.crimeOptions = LegalService.getCrimeOptions(caseObj.actualJudgment.charge, allCrimes);
+      }
       setCurrentCase(caseObj);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [nextCase]);
+  }, [nextCase, allCrimes]);
 
   // 预加载逻辑
   const preloadNextCase = useCallback(async (adcode) => {
@@ -63,13 +80,17 @@ export const useGame = (initialAdcode) => {
     setPreloading(true);
     try {
       const caseObj = await CaseLoader.loadRandomCase(adcode);
+      // 预加载时也尝试生成选项
+      if (allCrimes.length > 0) {
+        caseObj.crimeOptions = LegalService.getCrimeOptions(caseObj.actualJudgment.charge, allCrimes);
+      }
       setNextCase(caseObj);
     } catch (err) {
       console.warn('Preload failed:', err);
     } finally {
       setPreloading(false);
     }
-  }, [preloading, nextCase]);
+  }, [preloading, nextCase, allCrimes]);
 
   // 当 currentCase 变化且没有 nextCase 时，立即开始预加载下一个案例
   useEffect(() => {

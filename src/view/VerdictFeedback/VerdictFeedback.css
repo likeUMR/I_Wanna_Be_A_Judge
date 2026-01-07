@@ -10,6 +10,7 @@
 
 .verdict-paper {
   background: #fdfdfd;
+  color: #333; /* 显式设置文字颜色为深色，防止继承全局浅色文字 */
   padding: 4rem;
   border-radius: 2px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -46,7 +47,7 @@
 
 .verdict-case-id {
   font-size: 1.1rem;
-  color: #444;
+  color: #222; /* 加深颜色，回归黑色系 */
   margin-top: 0.8rem;
   font-family: 'SimSun', 'STSong', serif;
   font-weight: bold;
@@ -73,7 +74,7 @@
 .total-score {
   font-size: 2rem;
   font-weight: 800;
-  color: #2c3e50;
+  color: #1a1a1a; /* 改为深黑色 */
 }
 
 .score-summary {
@@ -108,21 +109,31 @@
 
 .comp-item {
   background: #f8f9fa;
-  padding: 1rem;
+  padding: 1.2rem;
   border-radius: 8px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.comp-item h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  line-height: 1.2;
 }
 
 .block-score {
   position: absolute;
-  top: 10px;
-  right: 15px;
+  top: 1.2rem;
+  right: 1.2rem;
   font-size: 0.95rem;
   font-weight: bold;
   padding: 3px 10px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
   transition: all 0.3s ease;
+  line-height: 1.2;
 }
 
 .score-low {
@@ -146,6 +157,7 @@
 .comp-row {
   display: flex;
   gap: 15px;
+  margin-top: 1.2rem; /* 增加与标题的间距 */
 }
 
 .comp-col {
@@ -154,7 +166,7 @@
 
 .comp-col label {
   font-size: 0.8rem;
-  color: #777;
+  color: #444; /* 加深标签颜色 */
   display: block;
   margin-bottom: 5px;
 }
@@ -175,8 +187,21 @@
 .deviation-note {
   font-size: 0.85rem;
   margin-top: 10px;
-  color: #666;
+  color: #888; /* 修改为灰色 */
   font-style: italic;
+}
+
+.verdict-paper h3 {
+  color: #1a1a1a;
+  margin-top: 2rem;
+}
+
+.verdict-paper h4 {
+  color: #1a1a1a;
+}
+
+.verdict-paper p {
+  color: #222; /* 确保正文为深色 */
 }
 
 .reasoning-section, .verdict-section {
@@ -190,6 +215,7 @@
   padding: 1rem;
   background: #fff9f0;
   border: 1px solid #ffe8cc;
+  color: #1a1a1a; /* 确保判决主文原文也是黑色 */
 }
 
 /* 结案印章 - 所有文字均加粗 */

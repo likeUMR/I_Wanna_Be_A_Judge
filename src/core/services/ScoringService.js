@@ -81,10 +81,20 @@ export class ScoringService {
 
   static _getPenaltyDeviation(player, actual) {
     if (player.mainPenalty !== actual.mainPenalty) return '主刑类型错误';
-    const playerTotal = player.years * 12 + player.months;
-    const actualTotal = actual.years * 12 + actual.months;
-    if (playerTotal === actualTotal) return '完全一致';
+    const playerTotal = (player.years || 0) * 12 + (player.months || 0);
+    const actualTotal = (actual.years || 0) * 12 + (actual.months || 0);
+    if (playerTotal === actualTotal) return '分毫不差';
     const diff = playerTotal - actualTotal;
-    return diff > 0 ? `偏重 ${Math.abs(diff)}个月` : `偏轻 ${Math.abs(diff)}个月`;
+    
+    let timeStr = '';
+    const absDiff = Math.abs(diff);
+    const years = Math.floor(absDiff / 12);
+    const months = absDiff % 12;
+    
+    if (years > 0) timeStr += `${years}年`;
+    if (months > 0) timeStr += `${months}个月`;
+    if (timeStr === '') timeStr = '0个月';
+
+    return diff > 0 ? `偏重 ${timeStr}` : `偏轻 ${timeStr}`;
   }
 }

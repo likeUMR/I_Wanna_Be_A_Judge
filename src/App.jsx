@@ -221,12 +221,22 @@ function App() {
                       <h3>⚖️ 宣判草案</h3>
                       <div className="form-group">
                         <label>认定罪名</label>
-                        <input 
-                          type="text" 
-                          value={playerJudgment.charge}
-                          onChange={(e) => updateJudgment({ charge: e.target.value })}
-                          placeholder="请输入罪名"
-                        />
+                        <div className="crime-options-grid">
+                          {currentCase.crimeOptions ? (
+                            currentCase.crimeOptions.map(option => (
+                              <button 
+                                key={option}
+                                className={`crime-option-btn ${playerJudgment.charge === option ? 'selected' : ''}`}
+                                onClick={() => updateJudgment({ charge: option })}
+                                title={option}
+                              >
+                                {option}
+                              </button>
+                            ))
+                          ) : (
+                            <div className="loading-options">罪名库加载中...</div>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="form-group">
