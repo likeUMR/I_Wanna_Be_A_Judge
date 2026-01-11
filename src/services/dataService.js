@@ -35,6 +35,19 @@ export const fetchCrimes = async () => {
 };
 
 /**
+ * 加载法律手册数据
+ */
+export const fetchLegalManual = async () => {
+  try {
+    const res = await axios.get('legal_manual.json');
+    return res.data;
+  } catch (e) {
+    console.warn('[数据] 加载法律手册失败:', e.message);
+    return [];
+  }
+};
+
+/**
  * 辅助函数：获取已玩过的案例ID列表
  */
 const getPlayedCases = () => {

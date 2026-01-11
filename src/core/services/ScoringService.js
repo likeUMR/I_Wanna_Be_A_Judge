@@ -26,10 +26,10 @@ export class ScoringService {
       if (['无期徒刑', '死刑'].includes(actual.mainPenalty)) {
         durationScore = 20;
       } else {
-        const playerTotalMonths = playerJudgment.years * 12 + playerJudgment.months;
-        const actualTotalMonths = (actual.years || 0) * 12 + (actual.months || 0);
+        const playerTotalMonths = playerJudgment.getTotalMonths();
+        const actualTotalMonths = (actual.years || 0) * 12 + (actual.months || 0) + ((actual.days || 0) / 30);
         
-        if (playerTotalMonths === actualTotalMonths) {
+        if (Math.abs(playerTotalMonths - actualTotalMonths) < 0.01) {
           durationScore = 20;
         } else if (playerTotalMonths === 0 || actualTotalMonths === 0) {
           durationScore = 0;

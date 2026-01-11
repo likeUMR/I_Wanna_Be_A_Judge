@@ -1,3 +1,5 @@
+import { fetchLegalManual } from '../../services/dataService';
+
 /**
  * 法律手册服务 - 逻辑层
  */
@@ -7,7 +9,7 @@ export class LegalService {
    * @returns {Promise<Array>} 返回 top 20 法条列表
    */
   static async loadLegalManual() {
-    // ...
+    return await fetchLegalManual();
   }
 
   /**

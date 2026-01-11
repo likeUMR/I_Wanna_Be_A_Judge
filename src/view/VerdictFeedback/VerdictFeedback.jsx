@@ -74,14 +74,28 @@ const VerdictFeedback = ({ caseObj, playerJudgment, scoring, scoreChange, rankIn
                 <label>玩家</label>
                 <div className="val">
                   {playerJudgment.mainPenalty}
-                  {!['无期徒刑', '死刑'].includes(playerJudgment.mainPenalty) && ` ${playerJudgment.years}年${playerJudgment.months}月`}
+                  {!['无期徒刑', '死刑'].includes(playerJudgment.mainPenalty) && (
+                    <>
+                      {playerJudgment.years > 0 && ` ${playerJudgment.years}年`}
+                      {playerJudgment.months > 0 && ` ${playerJudgment.months}个月`}
+                      {playerJudgment.days > 0 && ` ${playerJudgment.days}日`}
+                      {playerJudgment.years === 0 && playerJudgment.months === 0 && playerJudgment.days === 0 && ' 0天'}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="comp-col">
                 <label>实际</label>
                 <div className="val actual">
                   {caseObj.actualJudgment.mainPenalty}
-                  {!['无期徒刑', '死刑'].includes(caseObj.actualJudgment.mainPenalty) && ` ${caseObj.actualJudgment.years}年${caseObj.actualJudgment.months}月`}
+                  {!['无期徒刑', '死刑'].includes(caseObj.actualJudgment.mainPenalty) && (
+                    <>
+                      {caseObj.actualJudgment.years > 0 && ` ${caseObj.actualJudgment.years}年`}
+                      {caseObj.actualJudgment.months > 0 && ` ${caseObj.actualJudgment.months}个月`}
+                      {caseObj.actualJudgment.days > 0 && ` ${caseObj.actualJudgment.days}日`}
+                      {caseObj.actualJudgment.years === 0 && caseObj.actualJudgment.months === 0 && caseObj.actualJudgment.days === 0 && ' 0天'}
+                    </>
+                  )}
                 </div>
               </div>
             </div>

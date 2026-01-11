@@ -2,36 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { LegalService } from '../../core/services/LegalService';
 import './LegalManual.css';
 
-const LegalManual = () => {
+const LegalManual = ({ scale = 1 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [lawArticles, setLawArticles] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && lawArticles.length === 0) {
+    if (isOpen && (!lawArticles || lawArticles.length === 0)) {
       setLoading(true);
       LegalService.loadLegalManual().then(data => {
-        setLawArticles(data);
+        setLawArticles(data || []);
         setLoading(false);
       });
     }
-  }, [isOpen, lawArticles.length]);
+  }, [isOpen, lawArticles]);
 
   return (
-    <div className="legal-manual-container">
-      {/* 桌面上的书本入口 */}
+    <>
+      {/* 触发器包装器：镜像 app-container 的布局逻辑 */}
       <div 
-        className="desk-book" 
-        onClick={() => setIsOpen(true)}
-        title="点击查阅《中华人民共和国刑法》"
+        className="legal-manual-trigger-wrapper"
+        style={{
+          transform: `translateX(-50%) scale(${scale})`
+        }}
       >
-        <div className="book-tag">参考手册</div>
+        <div 
+          className="desk-book" 
+          onClick={() => setIsOpen(true)}
+          title="点击查阅《中华人民共和国刑法》"
+        >
+          <div className="book-tag">参考手册</div>
+        </div>
       </div>
 
-      {/* 手册弹出层 (双页书本样式) */}
+      {/* 手册弹出层 (全屏遮罩 + 侧边缩放内容) */}
       {isOpen && (
         <div className="manual-overlay" onClick={() => setIsOpen(false)}>
-          <div className="manual-content" onClick={e => e.stopPropagation()}>
+          <div 
+            className="manual-content" 
+            onClick={e => e.stopPropagation()}
+            style={{
+              '--manual-scale': scale,
+              transformOrigin: 'bottom right'
+            }}
+          >
             <div className="manual-header">
               <h2>⚖️ 中华人民共和国刑法</h2>
               <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
@@ -53,7 +67,7 @@ const LegalManual = () => {
                       <div className="article-title">{art.title}</div>
                       <div className="article-text">{art.content}</div>
                       <div className="article-footer">
-                        引用次数: {art.citation_count.toLocaleString()}
+                        引用次数: {art.citation_count?.toLocaleString() || 0}
                       </div>
                     </div>
                   ))}
@@ -63,7 +77,7 @@ const LegalManual = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

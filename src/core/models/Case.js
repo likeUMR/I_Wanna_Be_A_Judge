@@ -63,6 +63,7 @@ export class Case {
       mainPenalty: data['主刑'] || '',
       years: parseInt(data['刑期_年']) || 0,
       months: parseInt(data['刑期_月']) || 0,
+      days: parseInt(data['刑期_日']) || 0,
       hasFine: !!data['罚金'] && parseInt(data['罚金']) > 0,
       fineAmount: parseInt(data['罚金']) || 0,
       date: data['判决日期'] || ''
@@ -73,11 +74,12 @@ export class Case {
    * 获取格式化的刑期
    */
   getFormattedActualPenalty() {
-    const { mainPenalty, years, months } = this.actualJudgment;
+    const { mainPenalty, years, months, days } = this.actualJudgment;
     if (['无期徒刑', '死刑'].includes(mainPenalty)) return mainPenalty;
     let result = mainPenalty;
     if (years > 0) result += ` ${years}年`;
     if (months > 0) result += ` ${months}个月`;
+    if (days > 0) result += ` ${days}日`;
     return result;
   }
 }

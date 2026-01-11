@@ -302,6 +302,12 @@ body {
   border-radius: 2px;
 }
 
+.input-with-label span {
+  color: #5d4037;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
 .gavel-btn {
   width: 100%;
   padding: 18px;

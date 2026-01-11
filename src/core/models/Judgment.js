@@ -7,6 +7,7 @@ export class Judgment {
     this.mainPenalty = data.mainPenalty || '有期徒刑';
     this.years = parseInt(data.years) || 0;
     this.months = parseInt(data.months) || 0;
+    this.days = parseInt(data.days) || 0;
     this.hasFine = data.hasFine || false;
     this.fineAmount = parseInt(data.fineAmount) || 0;
     
@@ -21,6 +22,6 @@ export class Judgment {
    * 获取总刑期（月）
    */
   getTotalMonths() {
-    return this.years * 12 + this.months;
+    return this.years * 12 + this.months + (this.days / 30);
   }
 }

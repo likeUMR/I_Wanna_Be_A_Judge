@@ -243,7 +243,19 @@ function App() {
                         <label>刑罚类型</label>
                         <select 
                           value={playerJudgment.mainPenalty}
-                          onChange={(e) => updateJudgment({ mainPenalty: e.target.value })}
+                          onChange={(e) => {
+                            const newPenalty = e.target.value;
+                            const updates = { mainPenalty: newPenalty };
+                            if (newPenalty === '拘役') {
+                              updates.years = 0;
+                            }
+                            if (newPenalty === '无期徒刑' || newPenalty === '死刑') {
+                              updates.years = 0;
+                              updates.months = 0;
+                              updates.days = 0;
+                            }
+                            updateJudgment(updates);
+                          }}
                         >
                           <option value="有期徒刑">有期徒刑</option>
                           <option value="拘役">拘役</option>
@@ -255,22 +267,25 @@ function App() {
 
                       {['有期徒刑', '拘役', '管制'].includes(playerJudgment.mainPenalty) && (
                         <div className="duration-inputs">
-                          <div className="input-with-label">
-                            <input 
-                              type="number" 
-                              value={playerJudgment.years}
-                              onChange={(e) => updateJudgment({ years: parseInt(e.target.value) || 0 })}
-                              onWheel={(e) => {
-                                e.preventDefault();
-                                const delta = e.deltaY < 0 ? 1 : -1;
-                                const newVal = Math.max(0, Math.min(25, playerJudgment.years + delta));
-                                updateJudgment({ years: newVal });
-                              }}
-                              min="0"
-                              max="25"
-                            />
-                            <span>年</span>
-                          </div>
+                          {playerJudgment.mainPenalty !== '拘役' && (
+                            <div className="input-with-label">
+                              <input 
+                                type="number" 
+                                value={playerJudgment.years}
+                                onChange={(e) => updateJudgment({ years: parseInt(e.target.value) || 0 })}
+                                onWheel={(e) => {
+                                  e.preventDefault();
+                                  const delta = e.deltaY < 0 ? 1 : -1;
+                                  const maxYears = playerJudgment.mainPenalty === '有期徒刑' ? 25 : 3;
+                                  const newVal = Math.max(0, Math.min(maxYears, playerJudgment.years + delta));
+                                  updateJudgment({ years: newVal });
+                                }}
+                                min="0"
+                                max={playerJudgment.mainPenalty === '有期徒刑' ? 25 : 3}
+                              />
+                              <span>年</span>
+                            </div>
+                          )}
                           <div className="input-with-label">
                             <input 
                               type="number" 
@@ -279,13 +294,33 @@ function App() {
                               onWheel={(e) => {
                                 e.preventDefault();
                                 const delta = e.deltaY < 0 ? 1 : -1;
-                                const newVal = Math.max(0, Math.min(11, playerJudgment.months + delta));
+                                const maxMonths = playerJudgment.mainPenalty === '拘役' ? 12 : 11;
+                                const newVal = Math.max(0, Math.min(maxMonths, playerJudgment.months + delta));
                                 updateJudgment({ months: newVal });
                               }}
-                              min="0" max="11"
+                              min="0" 
+                              max={playerJudgment.mainPenalty === '拘役' ? 12 : 11}
                             />
                             <span>月</span>
                           </div>
+                          {(playerJudgment.mainPenalty === '拘役' || playerJudgment.mainPenalty === '管制') && (
+                            <div className="input-with-label">
+                              <input 
+                                type="number" 
+                                value={playerJudgment.days}
+                                onChange={(e) => updateJudgment({ days: parseInt(e.target.value) || 0 })}
+                                onWheel={(e) => {
+                                  e.preventDefault();
+                                  const delta = e.deltaY < 0 ? 1 : -1;
+                                  const newVal = Math.max(0, Math.min(30, (playerJudgment.days || 0) + delta));
+                                  updateJudgment({ days: newVal });
+                                }}
+                                min="0" 
+                                max="30"
+                              />
+                              <span>日</span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -314,12 +349,12 @@ function App() {
           </div>
         )}
       </main>
-      
-      {/* 法律手册入口 */}
-      <LegalManual />
-      </div>
     </div>
-  )
+    
+    {/* 法律手册入口 - 移出 app-container 以支持真正的全屏遮罩 */}
+    <LegalManual scale={scale} />
+  </div>
+)
 }
 
 export default App
